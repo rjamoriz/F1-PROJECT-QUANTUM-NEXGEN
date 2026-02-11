@@ -14,7 +14,7 @@ import ReactFlow, {
   MarkerType
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { Network, Activity, Zap } from 'lucide-react';
+import { Network, Activity, Zap } from './lucideShim';
 
 const AgentCommunicationGraph = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
@@ -26,18 +26,7 @@ const AgentCommunicationGraph = () => {
     activeAgents: 0
   });
 
-  useEffect(() => {
-    initializeAgentGraph();
-    
-    // Simulate real-time message flow
-    const interval = setInterval(() => {
-      simulateMessageFlow();
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const initializeAgentGraph = () => {
+  const initializeAgentGraph = useCallback(() => {
     // Define agent nodes
     const agentNodes = [
       {
@@ -243,9 +232,9 @@ const AgentCommunicationGraph = () => {
 
     setNodes(agentNodes);
     setEdges(agentEdges);
-  };
+  }, [setEdges, setNodes]);
 
-  const simulateMessageFlow = () => {
+  const simulateMessageFlow = useCallback(() => {
     // Simulate a message being sent
     const messageTypes = [
       { from: 'master', to: 'intent', type: 'task_decomposition', latency: 45 },
@@ -289,7 +278,18 @@ const AgentCommunicationGraph = () => {
         style: { ...edge.style, strokeWidth: 2 }
       })));
     }, 1000);
-  };
+  }, [setEdges]);
+
+  useEffect(() => {
+    initializeAgentGraph();
+
+    // Simulate real-time message flow
+    const interval = setInterval(() => {
+      simulateMessageFlow();
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [initializeAgentGraph, simulateMessageFlow]);
 
   const onConnect = useCallback(
     (params) => setEdges((eds) => addEdge(params, eds)),

@@ -5,7 +5,8 @@
 
 import React, { useState, useContext, createContext } from 'react';
 import axios from 'axios';
-import { User, Lock, Mail, Shield, LogIn, LogOut, UserPlus } from 'lucide-react';
+import { User, Lock, Mail, Shield, LogIn, LogOut, UserPlus } from './lucideShim';
+import { BACKEND_API_BASE } from '../config/endpoints';
 
 // Auth Context
 const AuthContext = createContext(null);
@@ -16,7 +17,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post('http://localhost:3001/api/auth/login', {
+      const response = await axios.post(`${BACKEND_API_BASE}/api/auth/login`, {
         email,
         password
       });
@@ -35,7 +36,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (name, email, password, role = 'engineer') => {
     try {
-      const response = await axios.post('http://localhost:3001/api/auth/register', {
+      const response = await axios.post(`${BACKEND_API_BASE}/api/auth/register`, {
         name,
         email,
         password,
@@ -384,4 +385,3 @@ const AuthenticationUI = () => {
 };
 
 export default AuthenticationUI;
-export { AuthProvider, useAuth };

@@ -4,10 +4,10 @@
  * Target: 50-100 qubits, IBM Quantum System One
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { Atom, Zap, Settings, TrendingUp, Clock, Activity } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Atom, Settings, TrendingUp, Clock, Activity } from './lucideShim';
+import { BACKEND_API_BASE } from '../config/endpoints';
 
 const VQEOptimizationPanel = () => {
   const [hardwareStatus, setHardwareStatus] = useState(null);
@@ -24,22 +24,9 @@ const VQEOptimizationPanel = () => {
     use_warm_start: true
   });
 
-  useEffect(() => {
-    loadHardwareStatus();
-    loadCircuitMetrics();
-    
-    // Poll hardware status every 10 seconds
-    const interval = setInterval(loadHardwareStatus, 10000);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    loadCircuitMetrics();
-  }, [config.num_qubits, config.num_layers]);
-
-  const loadHardwareStatus = async () => {
+  const loadHardwareStatus = useCallback(async () => {
     try {
-      const response = await axios.get('http://localhost:8005/api/quantum/vqe/hardware-status');
+      const response = await axios.get(`${BACKEND_API_BASE}/api/quantum/vqe/hardware-status`);
       setHardwareStatus(response.data);
     } catch (error) {
       // Mock status
@@ -51,12 +38,18 @@ const VQEOptimizationPanel = () => {
         error_rate: 0.001
       });
     }
-  };
+  }, []);
 
-  const loadCircuitMetrics = async () => {
+  const loadCircuitMetrics = useCallback(async () => {
     try {
       const response = await axios.get(
-        `http://localhost:8005/api/quantum/vqe/circuit-metrics?num_qubits=${config.num_qubits}&num_layers=${config.num_layers}`
+        `${BACKEND_API_BASE}/api/quantum/vqe/circuit-metrics`,
+        {
+          params: {
+            num_qubits: config.num_qubits,
+            num_layers: config.num_layers,
+          },
+        }
       );
       setCircuitMetrics(response.data);
     } catch (error) {
@@ -71,12 +64,24 @@ const VQEOptimizationPanel = () => {
         num_parameters: config.num_qubits * config.num_layers
       });
     }
-  };
+  }, [config.num_layers, config.num_qubits]);
+
+  useEffect(() => {
+    loadHardwareStatus();
+
+    // Poll hardware status every 10 seconds
+    const interval = setInterval(loadHardwareStatus, 10000);
+    return () => clearInterval(interval);
+  }, [loadHardwareStatus]);
+
+  useEffect(() => {
+    loadCircuitMetrics();
+  }, [loadCircuitMetrics]);
 
   const runOptimization = async () => {
     setIsOptimizing(true);
     try {
-      const response = await axios.post('http://localhost:8005/api/quantum/vqe/optimize-aero', {
+      const response = await axios.post(`${BACKEND_API_BASE}/api/quantum/vqe/optimize-aero`, {
         num_variables: config.num_variables,
         target_cl: config.target_cl,
         target_cd: config.target_cd,

@@ -6,8 +6,9 @@
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Atom, Zap, Network, TrendingUp, Clock, Settings } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Atom, Zap, Network, TrendingUp, Clock, Settings } from './lucideShim';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BACKEND_API_BASE } from '../config/endpoints';
 
 const DWaveAnnealingDashboard = () => {
   const [hardwareProps, setHardwareProps] = useState(null);
@@ -28,7 +29,7 @@ const DWaveAnnealingDashboard = () => {
 
   const loadHardwareProperties = async () => {
     try {
-      const response = await axios.get('http://localhost:8006/api/quantum/dwave/hardware-properties');
+      const response = await axios.get(`${BACKEND_API_BASE}/api/quantum/dwave/hardware-properties`);
       setHardwareProps(response.data);
     } catch (error) {
       // Mock properties
@@ -46,7 +47,7 @@ const DWaveAnnealingDashboard = () => {
   const runOptimization = async () => {
     setIsOptimizing(true);
     try {
-      const response = await axios.post('http://localhost:8006/api/quantum/dwave/optimize-wing', config);
+      const response = await axios.post(`${BACKEND_API_BASE}/api/quantum/dwave/optimize-wing`, config);
       setOptimizationResult(response.data);
     } catch (error) {
       // Mock result

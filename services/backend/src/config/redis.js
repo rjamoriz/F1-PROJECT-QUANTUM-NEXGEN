@@ -8,6 +8,23 @@ const logger = require('../utils/logger');
 
 const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
 let redisClient = null;
+let redisUnavailableLogged = false;
+
+function getActiveClient() {
+  if (!redisClient || !redisClient.isOpen) {
+    if (!redisUnavailableLogged) {
+      logger.warn('Redis client unavailable; cache operations will be skipped');
+      redisUnavailableLogged = true;
+    }
+    return null;
+  }
+
+  if (redisUnavailableLogged) {
+    redisUnavailableLogged = false;
+  }
+
+  return redisClient;
+}
 
 /**
  * Connect to Redis with retry logic
@@ -70,8 +87,11 @@ const cache = {
    * Get value from cache
    */
   async get(key) {
+    const client = getActiveClient();
+    if (!client) return null;
+
     try {
-      const value = await redisClient.get(key);
+      const value = await client.get(key);
       return value ? JSON.parse(value) : null;
     } catch (error) {
       logger.error(`Cache get error for key ${key}:`, error);
@@ -83,8 +103,11 @@ const cache = {
    * Set value in cache with optional TTL
    */
   async set(key, value, ttl = 3600) {
+    const client = getActiveClient();
+    if (!client) return false;
+
     try {
-      await redisClient.setEx(key, ttl, JSON.stringify(value));
+      await client.setEx(key, ttl, JSON.stringify(value));
       return true;
     } catch (error) {
       logger.error(`Cache set error for key ${key}:`, error);
@@ -96,8 +119,11 @@ const cache = {
    * Delete key from cache
    */
   async del(key) {
+    const client = getActiveClient();
+    if (!client) return false;
+
     try {
-      await redisClient.del(key);
+      await client.del(key);
       return true;
     } catch (error) {
       logger.error(`Cache delete error for key ${key}:`, error);
@@ -109,8 +135,11 @@ const cache = {
    * Check if key exists
    */
   async exists(key) {
+    const client = getActiveClient();
+    if (!client) return false;
+
     try {
-      return await redisClient.exists(key);
+      return await client.exists(key);
     } catch (error) {
       logger.error(`Cache exists error for key ${key}:`, error);
       return false;

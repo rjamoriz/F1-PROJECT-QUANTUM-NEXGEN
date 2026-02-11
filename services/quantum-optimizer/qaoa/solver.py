@@ -359,7 +359,24 @@ def create_qubo_from_problem(
     
     # Quadratic terms (off-diagonal)
     if 'quadratic' in objective:
-        for (i, j), coeff in objective['quadratic'].items():
+        for key, coeff in objective['quadratic'].items():
+            if isinstance(key, (list, tuple)) and len(key) == 2:
+                i, j = int(key[0]), int(key[1])
+            elif isinstance(key, str):
+                normalized_key = key.strip().replace('(', '').replace(')', '')
+                parts = [part.strip() for part in normalized_key.split(',')]
+                if len(parts) != 2:
+                    raise ValueError(
+                        f"Invalid quadratic key format '{key}'. "
+                        "Expected '(i,j)' or 'i,j'."
+                    )
+                i, j = int(parts[0]), int(parts[1])
+            else:
+                raise ValueError(
+                    f"Unsupported quadratic key type: {type(key)}. "
+                    "Use tuple/list or string key formats."
+                )
+
             Q[i, j] = coeff
             Q[j, i] = coeff  # Ensure symmetry
     

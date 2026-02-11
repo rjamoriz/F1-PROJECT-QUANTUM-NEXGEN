@@ -94,6 +94,63 @@ router.get('/vlm/validate', async (req, res, next) => {
 });
 
 /**
+ * POST /api/physics/v1/flow-field
+ * Compatibility proxy for visualization flow-field payloads.
+ */
+router.post('/v1/flow-field', async (req, res, next) => {
+  try {
+    logger.info('Flow-field compatibility request received');
+
+    const response = await physicsClient.post(
+      physicsConfig.endpoints.flowField,
+      req.body
+    );
+
+    res.json(response.data);
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * POST /api/physics/v1/panel-solve
+ * Compatibility proxy for panel-method visualization payloads.
+ */
+router.post('/v1/panel-solve', async (req, res, next) => {
+  try {
+    logger.info('Panel-solve compatibility request received');
+
+    const response = await physicsClient.post(
+      physicsConfig.endpoints.panelSolve,
+      req.body
+    );
+
+    res.json(response.data);
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * POST /api/physics/vlm/batch-simulate
+ * Compatibility proxy for synthetic batch VLM generation.
+ */
+router.post('/vlm/batch-simulate', async (req, res, next) => {
+  try {
+    logger.info('VLM batch-simulate request received');
+
+    const response = await physicsClient.post(
+      physicsConfig.endpoints.vlmBatchSimulate,
+      req.body
+    );
+
+    res.json(response.data);
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
  * GET /api/physics/health
  * Check physics service health
  */

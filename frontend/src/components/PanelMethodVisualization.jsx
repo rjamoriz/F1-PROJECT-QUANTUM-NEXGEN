@@ -3,12 +3,13 @@
  * Displays surface panels with source/doublet strength distribution
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import axios from 'axios';
-import { Layers, Droplets } from 'lucide-react';
+import { Layers } from './lucideShim';
+import { BACKEND_API_BASE } from '../config/endpoints';
 
 // Panel Mesh Component
 const PanelMesh = ({ panels, sourceStrength, showStreamlines }) => {
@@ -69,24 +70,7 @@ const PanelMethodVisualization = () => {
     alpha: 5.0
   });
 
-  useEffect(() => {
-    loadPanelData();
-  }, [parameters]);
-
-  const loadPanelData = async () => {
-    try {
-      const response = await axios.post('http://localhost:8001/api/v1/panel-solve', {
-        mesh_id: 'wing_v3.2',
-        velocity: parameters.velocity / 3.6,
-        alpha: parameters.alpha
-      });
-      setPanelData(response.data);
-    } catch (error) {
-      setPanelData(generateMockPanelData());
-    }
-  };
-
-  const generateMockPanelData = () => {
+  const generateMockPanelData = useCallback(() => {
     const panels = [];
     const sourceStrength = [];
     const streamlines = [];
@@ -149,7 +133,24 @@ const PanelMethodVisualization = () => {
       },
       pressureCoefficients: sourceStrength.map(s => -2 * s)
     };
-  };
+  }, []);
+
+  const loadPanelData = useCallback(async () => {
+    try {
+      const response = await axios.post(`${BACKEND_API_BASE}/api/physics/v1/panel-solve`, {
+        mesh_id: 'wing_v3.2',
+        velocity: parameters.velocity / 3.6,
+        alpha: parameters.alpha
+      });
+      setPanelData(response.data);
+    } catch (error) {
+      setPanelData(generateMockPanelData());
+    }
+  }, [generateMockPanelData, parameters.alpha, parameters.velocity]);
+
+  useEffect(() => {
+    loadPanelData();
+  }, [loadPanelData]);
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-lg">

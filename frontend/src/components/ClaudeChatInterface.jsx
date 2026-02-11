@@ -4,8 +4,9 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Mic, Bot, User, Loader } from 'lucide-react';
+import { Send, Mic, Bot, User, Loader } from './lucideShim';
 import axios from 'axios';
+import { BACKEND_API_BASE } from '../config/endpoints';
 
 const ClaudeChatInterface = () => {
   const [messages, setMessages] = useState([
@@ -47,7 +48,7 @@ const ClaudeChatInterface = () => {
 
     try {
       // Call GenAI agent API
-      const response = await axios.post('http://localhost:3001/api/agents/chat', {
+      const response = await axios.post(`${BACKEND_API_BASE}/api/claude/chat`, {
         message: input,
         conversationHistory: messages
       });

@@ -6,6 +6,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BACKEND_API_BASE } from '../config/endpoints';
 
 const TransientScenarioRunner = () => {
   const [scenario, setScenario] = useState('corner_exit_low');
@@ -41,7 +42,7 @@ const TransientScenarioRunner = () => {
         scenario_type: scenario
       };
 
-      const response = await axios.post('http://localhost:3001/api/transient/run-scenario', payload);
+      const response = await axios.post(`${BACKEND_API_BASE}/api/transient/run-scenario`, payload);
       
       setResults(response.data);
       

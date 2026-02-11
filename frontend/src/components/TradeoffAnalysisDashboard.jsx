@@ -1,68 +1,93 @@
 /**
  * Trade-off Analysis Dashboard
- * Multi-objective optimization with Pareto frontier visualization
+ * Multi-objective optimization with Pareto frontier visualization.
  */
 
-import React, { useState, useEffect } from 'react';
-import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ZAxis } from 'recharts';
-import { TrendingUp, Target, AlertTriangle } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import axios from 'axios';
+import { BACKEND_API_BASE } from '../config/endpoints';
+import {
+  ScatterChart,
+  Scatter,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  ZAxis,
+} from 'recharts';
+import { TrendingUp, Target, AlertTriangle } from './lucideShim';
+
+const API_BASE = BACKEND_API_BASE;
+
+const DEFAULT_SUMMARY = {
+  total_designs: 0,
+  pareto_optimal: 0,
+  feasible_designs: 0,
+  infeasible_designs: 0,
+};
 
 const TradeoffAnalysisDashboard = () => {
   const [designs, setDesigns] = useState([]);
+  const [summary, setSummary] = useState(DEFAULT_SUMMARY);
   const [selectedDesign, setSelectedDesign] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [objectives, setObjectives] = useState({
     x: 'drag',
     y: 'downforce',
-    z: 'flutter_margin'
+    z: 'flutter_margin',
   });
+
+  const loadDesigns = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${API_BASE}/api/simulation/pareto`, {
+        params: {
+          limit_runs: 40,
+          max_points: 180,
+        },
+      });
+      const payload = response?.data?.data || {};
+      const incomingDesigns = Array.isArray(payload.designs) ? payload.designs : [];
+      setDesigns(incomingDesigns);
+      setSummary({
+        ...DEFAULT_SUMMARY,
+        ...(payload.summary || {}),
+      });
+      setSelectedDesign((previous) => (
+        incomingDesigns.some((design) => design.id === previous?.id)
+          ? previous
+          : (incomingDesigns[0] || null)
+      ));
+      setError(null);
+    } catch (requestError) {
+      setError(requestError?.message || 'Failed to load Pareto dataset');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     loadDesigns();
-  }, []);
+  }, [loadDesigns]);
 
-  const loadDesigns = () => {
-    // Generate mock Pareto frontier data
-    const mockDesigns = [];
-    for (let i = 0; i < 50; i++) {
-      const drag = 0.35 + Math.random() * 0.15;
-      const downforce = 2.0 + Math.random() * 1.0;
-      const flutterMargin = 1.1 + Math.random() * 0.4;
-      const mass = 4.0 + Math.random() * 1.5;
-      const L_D = downforce / drag;
-      
-      // Determine if Pareto optimal (simplified)
-      const isParetoOptimal = Math.random() > 0.7;
-      
-      mockDesigns.push({
-        id: `design_${i}`,
-        name: `Design ${i + 1}`,
-        drag,
-        downforce,
-        flutter_margin: flutterMargin,
-        mass,
-        L_D,
-        isParetoOptimal,
-        feasible: flutterMargin > 1.2 && mass < 5.0
-      });
-    }
-    setDesigns(mockDesigns);
-  };
+  const scatterData = useMemo(() => (
+    designs.map((design) => ({
+      x: Number(design?.[objectives.x] ?? 0),
+      y: Number(design?.[objectives.y] ?? 0),
+      z: Number(design?.[objectives.z] ?? 0),
+      name: design.name,
+      isParetoOptimal: Boolean(design.isParetoOptimal),
+      feasible: Boolean(design.feasible),
+      design,
+    }))
+  ), [designs, objectives]);
 
-  const getScatterData = () => {
-    return designs.map(d => ({
-      x: d[objectives.x],
-      y: d[objectives.y],
-      z: d[objectives.z] || 1,
-      name: d.name,
-      isParetoOptimal: d.isParetoOptimal,
-      feasible: d.feasible,
-      design: d
-    }));
-  };
-
-  const paretoDesigns = designs.filter(d => d.isParetoOptimal && d.feasible);
-  const feasibleDesigns = designs.filter(d => d.feasible);
-  const infeasibleDesigns = designs.filter(d => !d.feasible);
+  const paretoDesigns = designs.filter((design) => design.isParetoOptimal && design.feasible);
+  const feasibleDesigns = designs.filter((design) => design.feasible);
+  const infeasibleDesigns = designs.filter((design) => !design.feasible);
 
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
@@ -71,13 +96,13 @@ const TradeoffAnalysisDashboard = () => {
         <div className="bg-white p-3 border-2 border-gray-300 rounded shadow-lg">
           <p className="font-semibold">{data.name}</p>
           <p className="text-sm">Drag: {data.x.toFixed(3)}</p>
-          <p className="text-sm">Downforce: {data.y.toFixed(2)} kN</p>
-          <p className="text-sm">Flutter Margin: {data.z.toFixed(2)}</p>
+          <p className="text-sm">Downforce: {data.y.toFixed(2)}</p>
+          <p className="text-sm">Objective Z: {data.z.toFixed(2)}</p>
           <p className={`text-sm font-bold ${data.isParetoOptimal ? 'text-green-600' : 'text-gray-600'}`}>
-            {data.isParetoOptimal ? '★ Pareto Optimal' : 'Non-optimal'}
+            {data.isParetoOptimal ? 'Pareto Optimal' : 'Non-optimal'}
           </p>
           <p className={`text-sm ${data.feasible ? 'text-green-600' : 'text-red-600'}`}>
-            {data.feasible ? '✓ Feasible' : '✗ Infeasible'}
+            {data.feasible ? 'Feasible' : 'Infeasible'}
           </p>
         </div>
       );
@@ -93,30 +118,44 @@ const TradeoffAnalysisDashboard = () => {
       </h2>
 
       <p className="text-gray-600 mb-6">
-        Multi-objective optimization analysis with Pareto frontier. Explore trade-offs between competing objectives.
+        Pareto frontier built from recent simulation outputs, including feasibility and optimization provenance.
       </p>
 
-      {/* Statistics */}
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+          {error}
+        </div>
+      )}
+
+      <div className="mb-4 flex items-center gap-3">
+        <button
+          onClick={loadDesigns}
+          className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm"
+          disabled={loading}
+        >
+          {loading ? 'Refreshing...' : 'Refresh Pareto Data'}
+        </button>
+      </div>
+
       <div className="grid grid-cols-4 gap-4 mb-6">
         <div className="p-4 bg-blue-50 border border-blue-200 rounded">
           <div className="text-sm text-blue-700">Total Designs</div>
-          <div className="text-2xl font-bold text-blue-900">{designs.length}</div>
+          <div className="text-2xl font-bold text-blue-900">{summary.total_designs || designs.length}</div>
         </div>
         <div className="p-4 bg-green-50 border border-green-200 rounded">
           <div className="text-sm text-green-700">Pareto Optimal</div>
-          <div className="text-2xl font-bold text-green-900">{paretoDesigns.length}</div>
+          <div className="text-2xl font-bold text-green-900">{summary.pareto_optimal || paretoDesigns.length}</div>
         </div>
         <div className="p-4 bg-yellow-50 border border-yellow-200 rounded">
           <div className="text-sm text-yellow-700">Feasible</div>
-          <div className="text-2xl font-bold text-yellow-900">{feasibleDesigns.length}</div>
+          <div className="text-2xl font-bold text-yellow-900">{summary.feasible_designs || feasibleDesigns.length}</div>
         </div>
         <div className="p-4 bg-red-50 border border-red-200 rounded">
           <div className="text-sm text-red-700">Infeasible</div>
-          <div className="text-2xl font-bold text-red-900">{infeasibleDesigns.length}</div>
+          <div className="text-2xl font-bold text-red-900">{summary.infeasible_designs || infeasibleDesigns.length}</div>
         </div>
       </div>
 
-      {/* Objective Selection */}
       <div className="mb-6 p-4 bg-gray-50 rounded border border-gray-200">
         <h3 className="font-semibold mb-3">Select Objectives</h3>
         <div className="grid grid-cols-3 gap-4">
@@ -124,11 +163,11 @@ const TradeoffAnalysisDashboard = () => {
             <label className="block text-sm font-medium mb-1">X-Axis</label>
             <select
               value={objectives.x}
-              onChange={(e) => setObjectives({...objectives, x: e.target.value})}
+              onChange={(e) => setObjectives({ ...objectives, x: e.target.value })}
               className="w-full px-3 py-2 border rounded"
             >
               <option value="drag">Drag (Cd)</option>
-              <option value="downforce">Downforce (kN)</option>
+              <option value="downforce">Downforce (Cl proxy)</option>
               <option value="mass">Mass (kg)</option>
               <option value="L_D">L/D Ratio</option>
             </select>
@@ -137,10 +176,10 @@ const TradeoffAnalysisDashboard = () => {
             <label className="block text-sm font-medium mb-1">Y-Axis</label>
             <select
               value={objectives.y}
-              onChange={(e) => setObjectives({...objectives, y: e.target.value})}
+              onChange={(e) => setObjectives({ ...objectives, y: e.target.value })}
               className="w-full px-3 py-2 border rounded"
             >
-              <option value="downforce">Downforce (kN)</option>
+              <option value="downforce">Downforce (Cl proxy)</option>
               <option value="drag">Drag (Cd)</option>
               <option value="mass">Mass (kg)</option>
               <option value="L_D">L/D Ratio</option>
@@ -150,67 +189,69 @@ const TradeoffAnalysisDashboard = () => {
             <label className="block text-sm font-medium mb-1">Color (Z)</label>
             <select
               value={objectives.z}
-              onChange={(e) => setObjectives({...objectives, z: e.target.value})}
+              onChange={(e) => setObjectives({ ...objectives, z: e.target.value })}
               className="w-full px-3 py-2 border rounded"
             >
               <option value="flutter_margin">Flutter Margin</option>
               <option value="mass">Mass (kg)</option>
               <option value="L_D">L/D Ratio</option>
+              <option value="selected_ratio">Selected Node Ratio</option>
             </select>
           </div>
         </div>
       </div>
 
-      {/* Pareto Frontier Chart */}
-      <div className="mb-6 p-4 bg-gray-50 rounded border border-gray-200">
-        <h3 className="font-semibold mb-3">Pareto Frontier</h3>
-        <ResponsiveContainer width="100%" height={400}>
-          <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-              type="number"
-              dataKey="x"
-              name={objectives.x}
-              label={{ value: objectives.x.replace('_', ' ').toUpperCase(), position: 'insideBottom', offset: -10 }}
-            />
-            <YAxis
-              type="number"
-              dataKey="y"
-              name={objectives.y}
-              label={{ value: objectives.y.replace('_', ' ').toUpperCase(), angle: -90, position: 'insideLeft' }}
-            />
-            <ZAxis type="number" dataKey="z" range={[50, 400]} />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend />
-            
-            {/* Infeasible designs */}
-            <Scatter
-              name="Infeasible"
-              data={getScatterData().filter(d => !d.feasible)}
-              fill="#ef4444"
-              opacity={0.3}
-            />
-            
-            {/* Feasible non-Pareto designs */}
-            <Scatter
-              name="Feasible"
-              data={getScatterData().filter(d => d.feasible && !d.isParetoOptimal)}
-              fill="#3b82f6"
-              opacity={0.5}
-            />
-            
-            {/* Pareto optimal designs */}
-            <Scatter
-              name="Pareto Optimal"
-              data={getScatterData().filter(d => d.isParetoOptimal && d.feasible)}
-              fill="#10b981"
-              shape="star"
-            />
-          </ScatterChart>
-        </ResponsiveContainer>
-      </div>
+      {designs.length > 0 ? (
+        <div className="mb-6 p-4 bg-gray-50 rounded border border-gray-200">
+          <h3 className="font-semibold mb-3">Pareto Frontier</h3>
+          <ResponsiveContainer width="100%" height={400}>
+            <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis
+                type="number"
+                dataKey="x"
+                name={objectives.x}
+                label={{ value: objectives.x.replace('_', ' ').toUpperCase(), position: 'insideBottom', offset: -10 }}
+              />
+              <YAxis
+                type="number"
+                dataKey="y"
+                name={objectives.y}
+                label={{ value: objectives.y.replace('_', ' ').toUpperCase(), angle: -90, position: 'insideLeft' }}
+              />
+              <ZAxis type="number" dataKey="z" range={[50, 400]} />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend />
 
-      {/* Pareto Optimal Designs Table */}
+              <Scatter
+                name="Infeasible"
+                data={scatterData.filter((d) => !d.feasible)}
+                fill="#ef4444"
+                opacity={0.35}
+              />
+
+              <Scatter
+                name="Feasible"
+                data={scatterData.filter((d) => d.feasible && !d.isParetoOptimal)}
+                fill="#3b82f6"
+                opacity={0.55}
+              />
+
+              <Scatter
+                name="Pareto Optimal"
+                data={scatterData.filter((d) => d.isParetoOptimal && d.feasible)}
+                fill="#10b981"
+                shape="star"
+              />
+            </ScatterChart>
+          </ResponsiveContainer>
+        </div>
+      ) : (
+        <div className="mb-6 p-4 bg-gray-50 rounded border border-gray-200 text-sm text-gray-600">
+          No simulation-derived design points yet. Run at least one coupled simulation to populate this view.
+        </div>
+      )}
+
       <div className="mb-6">
         <h3 className="font-semibold mb-3 flex items-center gap-2">
           <Target className="w-5 h-5 text-green-600" />
@@ -222,7 +263,7 @@ const TradeoffAnalysisDashboard = () => {
               <tr>
                 <th className="px-4 py-2 text-left">Design</th>
                 <th className="px-4 py-2 text-right">Drag (Cd)</th>
-                <th className="px-4 py-2 text-right">Downforce (kN)</th>
+                <th className="px-4 py-2 text-right">Downforce</th>
                 <th className="px-4 py-2 text-right">L/D</th>
                 <th className="px-4 py-2 text-right">Flutter Margin</th>
                 <th className="px-4 py-2 text-right">Mass (kg)</th>
@@ -230,69 +271,62 @@ const TradeoffAnalysisDashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {paretoDesigns.slice(0, 10).map((design) => (
+              {paretoDesigns.slice(0, 12).map((design) => (
                 <tr
                   key={design.id}
                   className="border-b hover:bg-gray-50 cursor-pointer"
                   onClick={() => setSelectedDesign(design)}
                 >
                   <td className="px-4 py-2 font-medium">{design.name}</td>
-                  <td className="px-4 py-2 text-right font-mono">{design.drag.toFixed(3)}</td>
-                  <td className="px-4 py-2 text-right font-mono">{design.downforce.toFixed(2)}</td>
-                  <td className="px-4 py-2 text-right font-mono">{design.L_D.toFixed(2)}</td>
+                  <td className="px-4 py-2 text-right font-mono">{Number(design.drag || 0).toFixed(3)}</td>
+                  <td className="px-4 py-2 text-right font-mono">{Number(design.downforce || 0).toFixed(2)}</td>
+                  <td className="px-4 py-2 text-right font-mono">{Number(design.L_D || 0).toFixed(2)}</td>
                   <td className="px-4 py-2 text-right font-mono">
-                    <span className={design.flutter_margin >= 1.5 ? 'text-green-600 font-bold' : 'text-yellow-600'}>
-                      {design.flutter_margin.toFixed(2)}
+                    <span className={Number(design.flutter_margin || 0) >= 1.5 ? 'text-green-600 font-bold' : 'text-yellow-600'}>
+                      {Number(design.flutter_margin || 0).toFixed(2)}
                     </span>
                   </td>
-                  <td className="px-4 py-2 text-right font-mono">{design.mass.toFixed(2)}</td>
+                  <td className="px-4 py-2 text-right font-mono">{Number(design.mass || 0).toFixed(2)}</td>
                   <td className="px-4 py-2 text-center">
                     <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
-                      ★ Optimal
+                      Optimal
                     </span>
                   </td>
                 </tr>
               ))}
+              {paretoDesigns.length === 0 && (
+                <tr>
+                  <td className="px-4 py-3 text-sm text-gray-600" colSpan={7}>
+                    No feasible Pareto points available for the selected dataset.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* Recommendations */}
+      {selectedDesign && (
+        <div className="mb-6 p-4 bg-indigo-50 border border-indigo-200 rounded text-sm">
+          <h3 className="font-semibold mb-2">Selected Design</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div><strong>ID:</strong> {selectedDesign.id}</div>
+            <div><strong>Source:</strong> {selectedDesign.source}</div>
+            <div><strong>Simulation:</strong> {selectedDesign.simulation_id}</div>
+            <div><strong>Status:</strong> {selectedDesign.status}</div>
+          </div>
+        </div>
+      )}
+
       <div className="p-4 bg-purple-50 border border-purple-200 rounded">
         <h3 className="font-semibold mb-3 flex items-center gap-2">
           <AlertTriangle className="w-5 h-5 text-purple-600" />
           Recommendations
         </h3>
         <div className="space-y-2 text-sm">
-          <div className="flex items-start gap-2">
-            <span className="text-purple-600 font-bold">1.</span>
-            <p>
-              <strong>High Downforce Track (Monaco):</strong> Select designs with highest downforce (≥2.8 kN) 
-              even if drag is higher. Prioritize L/D &gt; 5.5.
-            </p>
-          </div>
-          <div className="flex items-start gap-2">
-            <span className="text-purple-600 font-bold">2.</span>
-            <p>
-              <strong>Low Drag Track (Monza):</strong> Minimize drag (Cd &lt; 0.40) while maintaining 
-              sufficient downforce for stability. Target L/D &gt; 7.0.
-            </p>
-          </div>
-          <div className="flex items-start gap-2">
-            <span className="text-purple-600 font-bold">3.</span>
-            <p>
-              <strong>Safety Critical:</strong> Always ensure flutter margin ≥ 1.2. Designs with 
-              margin &lt; 1.5 require additional validation.
-            </p>
-          </div>
-          <div className="flex items-start gap-2">
-            <span className="text-purple-600 font-bold">4.</span>
-            <p>
-              <strong>Mass Constraint:</strong> Keep total mass under 5.0 kg for FIA compliance. 
-              Consider weight distribution for balance.
-            </p>
-          </div>
+          <p><strong>Monaco/high-downforce setup:</strong> prioritize top downforce with flutter margin at or above 1.2.</p>
+          <p><strong>Monza/low-drag setup:</strong> prioritize drag minimization while preserving acceptable downforce balance.</p>
+          <p><strong>Validation gate:</strong> treat low flutter margin and high mass points as candidates requiring extra CFD and structural checks.</p>
         </div>
       </div>
     </div>

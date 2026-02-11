@@ -21,6 +21,8 @@ class AeroResult:
     pressure: np.ndarray  # Pressure distribution
     gamma: np.ndarray  # Vortex strengths
     forces: Dict[str, float]  # Detailed force breakdown
+    panel_forces: np.ndarray  # Per-panel force vectors [Fx, Fy, Fz]
+    control_points: np.ndarray  # Per-panel control point coordinates
 
 
 @dataclass
@@ -135,7 +137,7 @@ class VortexLatticeMethod:
         gamma = np.linalg.solve(self.influence_matrix, rhs)
         
         # Compute forces using Kutta-Joukowski theorem
-        forces = self._compute_forces(gamma, v_inf, rho)
+        forces, panel_forces = self._compute_forces(gamma, v_inf, rho)
         
         # Compute pressure distribution
         pressure = self._compute_pressure(gamma, v_inf, rho)
@@ -157,7 +159,9 @@ class VortexLatticeMethod:
             cm=cm,
             pressure=pressure,
             gamma=gamma,
-            forces=forces
+            forces=forces,
+            panel_forces=panel_forces,
+            control_points=self.control_points.copy()
         )
     
     def _generate_panels(self):
@@ -317,7 +321,12 @@ class VortexLatticeMethod:
         """
         return -np.dot(self.normals, v_inf)
     
-    def _compute_forces(self, gamma: np.ndarray, v_inf: np.ndarray, rho: float) -> Dict[str, float]:
+    def _compute_forces(
+        self,
+        gamma: np.ndarray,
+        v_inf: np.ndarray,
+        rho: float
+    ) -> Tuple[Dict[str, float], np.ndarray]:
         """
         Compute aerodynamic forces using Kutta-Joukowski theorem.
         
@@ -332,19 +341,21 @@ class VortexLatticeMethod:
             Dictionary with lift, drag, side force, moment
         """
         forces = {'lift': 0.0, 'drag': 0.0, 'side': 0.0, 'moment': 0.0}
+        panel_forces = np.zeros((self.n_panels, 3))
         
         for i in range(self.n_panels):
             # Panel dimensions
             panel_i = i // self.n_panels_x
             panel_j = i % self.n_panels_x
             
-            # Bound vortex vector
-            p1 = self.panels[panel_i, panel_j]
-            p2 = self.panels[panel_i, panel_j+1]
-            dl = p2 - p1
+            # Bound vortex segment at quarter-chord (spanwise direction)
+            p1 = 0.25 * (self.panels[panel_i, panel_j] + self.panels[panel_i, panel_j+1])
+            p2 = 0.25 * (self.panels[panel_i+1, panel_j] + self.panels[panel_i+1, panel_j+1])
+            dl = p1 - p2
             
             # Kutta-Joukowski: dF = rho * V_inf × (Gamma * dl)
             dF = rho * np.cross(v_inf, gamma[i] * dl)
+            panel_forces[i] = dF
             
             forces['lift'] += dF[2]  # Z-component
             forces['drag'] += -dF[0]  # -X-component (induced drag)
@@ -354,7 +365,7 @@ class VortexLatticeMethod:
             r = self.control_points[i]
             forces['moment'] += np.cross(r, dF)[1]  # Pitching moment
         
-        return forces
+        return forces, panel_forces
     
     def _compute_pressure(self, gamma: np.ndarray, v_inf: np.ndarray, rho: float) -> np.ndarray:
         """

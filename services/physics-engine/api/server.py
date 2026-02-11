@@ -10,6 +10,7 @@ from typing import Optional, List, Dict
 import sys
 import os
 import logging
+import math
 
 # Add parent directory to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -59,6 +60,52 @@ class SimulationRequest(BaseModel):
     n_panels_y: int = Field(10, ge=5, le=100, description="Spanwise panels")
 
 
+class SweepRequest(BaseModel):
+    """Alpha sweep request payload"""
+    geometry: GeometryRequest
+    velocity: float = Field(..., gt=0)
+    alpha_start: float = Field(-10, ge=-20, le=20)
+    alpha_end: float = Field(10, ge=-20, le=20)
+    alpha_step: float = Field(1.0, gt=0, le=5)
+    n_panels_x: int = Field(20, ge=5, le=100)
+    n_panels_y: int = Field(10, ge=5, le=100)
+
+
+class FlowFieldRequest(BaseModel):
+    """Flow field visualization request"""
+    mesh_id: str = Field("wing_v3.2", description="Mesh identifier")
+    velocity: float = Field(..., gt=0, description="Freestream velocity in m/s")
+    alpha: float = Field(..., ge=-20, le=20, description="Angle of attack in degrees")
+
+
+class PanelSolveRequest(BaseModel):
+    """Panel method visualization request"""
+    mesh_id: str = Field("wing_v3.2", description="Mesh identifier")
+    velocity: float = Field(..., gt=0, description="Freestream velocity in m/s")
+    alpha: float = Field(..., ge=-20, le=20, description="Angle of attack in degrees")
+
+
+class BatchSimulateRequest(BaseModel):
+    """Batch VLM synthetic generation request"""
+    n_samples: int = Field(100, ge=1, le=50000)
+    speed_range: List[float] = Field(default_factory=lambda: [100.0, 300.0], min_items=2, max_items=2)
+    yaw_range: List[float] = Field(default_factory=lambda: [0.0, 10.0], min_items=2, max_items=2)
+
+
+class LatticeNodeResponse(BaseModel):
+    """VLM panel node force/pressure response"""
+    node_id: int = Field(..., description="Linear panel index")
+    span_index: int = Field(..., description="Spanwise index")
+    chord_index: int = Field(..., description="Chordwise index")
+    position: List[float] = Field(..., description="Control point position [x,y,z]")
+    gamma: float = Field(..., description="Panel circulation strength")
+    cp: float = Field(..., description="Local pressure coefficient")
+    lift: float = Field(..., description="Local lift force contribution [N]")
+    drag: float = Field(..., description="Local drag force contribution [N]")
+    side_force: float = Field(..., description="Local side force contribution [N]")
+    force_vector: List[float] = Field(..., description="Force vector [Fx,Fy,Fz]")
+
+
 class AeroResponse(BaseModel):
     """Aerodynamic results"""
     cl: float = Field(..., description="Lift coefficient")
@@ -70,6 +117,11 @@ class AeroResponse(BaseModel):
     side_force: float = Field(..., description="Side force in N")
     moment: float = Field(..., description="Pitching moment in N·m")
     pressure: List[float] = Field(..., description="Pressure coefficient distribution")
+    gamma: List[float] = Field(..., description="Vortex circulation strength at each panel")
+    lattice_nodes: List[LatticeNodeResponse] = Field(
+        default_factory=list,
+        description="Per-panel node metrics for drag/lift visualization"
+    )
     n_panels: int = Field(..., description="Total number of panels")
 
 
@@ -155,7 +207,24 @@ async def solve_vlm(request: SimulationRequest):
         
         # Prepare response
         l_over_d = result.cl / result.cd if result.cd > 0 else 0
-        
+
+        lattice_nodes = []
+        for idx in range(result.gamma.shape[0]):
+            force_vec = result.panel_forces[idx]
+            cp_position = result.control_points[idx]
+            lattice_nodes.append({
+                "node_id": int(idx),
+                "span_index": int(idx // request.n_panels_x),
+                "chord_index": int(idx % request.n_panels_x),
+                "position": cp_position.tolist(),
+                "gamma": float(result.gamma[idx]),
+                "cp": float(result.pressure[idx]),
+                "lift": float(force_vec[2]),
+                "drag": float(-force_vec[0]),
+                "side_force": float(force_vec[1]),
+                "force_vector": force_vec.tolist(),
+            })
+
         response = AeroResponse(
             cl=result.cl,
             cd=result.cd,
@@ -166,6 +235,8 @@ async def solve_vlm(request: SimulationRequest):
             side_force=result.forces['side'],
             moment=result.forces['moment'],
             pressure=result.pressure.tolist(),
+            gamma=result.gamma.tolist(),
+            lattice_nodes=lattice_nodes,
             n_panels=request.n_panels_x * request.n_panels_y
         )
         
@@ -179,15 +250,7 @@ async def solve_vlm(request: SimulationRequest):
 
 
 @app.post("/vlm/sweep")
-async def alpha_sweep(
-    geometry: GeometryRequest,
-    velocity: float = Field(..., gt=0),
-    alpha_start: float = Field(-10, ge=-20, le=20),
-    alpha_end: float = Field(10, ge=-20, le=20),
-    alpha_step: float = Field(1.0, gt=0, le=5),
-    n_panels_x: int = Field(20, ge=5, le=100),
-    n_panels_y: int = Field(10, ge=5, le=100)
-):
+async def alpha_sweep(request: SweepRequest):
     """
     Perform angle of attack sweep.
     
@@ -209,26 +272,26 @@ async def alpha_sweep(
     try:
         import numpy as np
         
-        alphas = np.arange(alpha_start, alpha_end + alpha_step, alpha_step)
+        alphas = np.arange(request.alpha_start, request.alpha_end + request.alpha_step, request.alpha_step)
         results = []
         
         # Create geometry
         geom = WingGeometry(
-            span=geometry.span,
-            chord=geometry.chord,
-            twist=geometry.twist,
-            dihedral=geometry.dihedral,
-            sweep=geometry.sweep,
-            taper_ratio=geometry.taper_ratio
+            span=request.geometry.span,
+            chord=request.geometry.chord,
+            twist=request.geometry.twist,
+            dihedral=request.geometry.dihedral,
+            sweep=request.geometry.sweep,
+            taper_ratio=request.geometry.taper_ratio
         )
         
         # Initialize solver
-        vlm = VortexLatticeMethod(n_panels_x=n_panels_x, n_panels_y=n_panels_y)
+        vlm = VortexLatticeMethod(n_panels_x=request.n_panels_x, n_panels_y=request.n_panels_y)
         vlm.setup_geometry(geom)
         
         # Sweep through angles
         for alpha in alphas:
-            result = vlm.solve(velocity=velocity, alpha=float(alpha))
+            result = vlm.solve(velocity=request.velocity, alpha=float(alpha))
             
             results.append({
                 'alpha': float(alpha),
@@ -304,6 +367,209 @@ async def validate_solver():
     except Exception as e:
         logger.error(f"Validation error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Validation error: {str(e)}")
+
+
+@app.post("/api/v1/flow-field")
+async def flow_field(request: FlowFieldRequest):
+    """
+    Generate flow-field visualization payload compatible with frontend viewers.
+    """
+    try:
+        vectors = []
+        streamlines = []
+        vortex_cores = []
+        pressure_data = []
+
+        velocity_scale = request.velocity / 70.0
+        alpha_rad = math.radians(request.alpha)
+
+        for i in range(10):
+            for j in range(10):
+                for k in range(4):
+                    x = (i - 5) * 0.2
+                    y = k * 0.12
+                    z = (j - 5) * 0.12
+                    radial = math.sqrt(x * x + z * z) + 1e-6
+                    swirl = math.sin(radial * 2.8 + alpha_rad) * 0.08
+                    vx = (1.0 + 0.18 * math.cos(radial + alpha_rad)) * velocity_scale
+                    vy = swirl
+                    vz = 0.03 + 0.05 * math.sin(x * 1.9)
+
+                    vectors.append({
+                        "position": [round(x, 5), round(y, 5), round(z, 5)],
+                        "velocity": [round(vx, 5), round(vy, 5), round(vz, 5)],
+                    })
+
+                    pressure = -0.5 * (vx * vx + vy * vy + vz * vz)
+                    pressure_data.append({
+                        "position": [round(x, 5), round(y, 5), round(z, 5)],
+                        "value": round(pressure, 6),
+                    })
+
+        for line_idx in range(8):
+            y = (line_idx - 3.5) * 0.16
+            points = []
+            for step in range(55):
+                x = -1.2 + step * 0.05
+                z = 0.08 * math.sin((x + y) * 2.7 + alpha_rad)
+                points.append([round(y, 5), round(z, 5), round(x, 5)])
+            streamlines.append({"points": points})
+
+        vortex_cores.append({
+            "position": [0.0, 0.07, 0.12],
+            "radius": 0.085,
+            "strength": round(1.4 + abs(alpha_rad) * 0.6, 4),
+        })
+        vortex_cores.append({
+            "position": [0.0, 0.05, 0.68],
+            "radius": 0.055,
+            "strength": round(0.8 + abs(alpha_rad) * 0.2, 4),
+        })
+
+        magnitudes = [
+            math.sqrt(v["velocity"][0] ** 2 + v["velocity"][1] ** 2 + v["velocity"][2] ** 2)
+            for v in vectors
+        ]
+        pressure_values = [p["value"] for p in pressure_data]
+
+        return {
+            "mesh_id": request.mesh_id,
+            "vectors": vectors,
+            "streamlines": streamlines,
+            "vortexCores": vortex_cores,
+            "pressureData": pressure_data,
+            "statistics": {
+                "maxVelocity": round(max(magnitudes), 5),
+                "minPressure": round(min(pressure_values), 6),
+                "maxVorticity": round(max(core["strength"] for core in vortex_cores) * 1.8, 5),
+                "turbulenceIntensity": round(0.12 + min(0.14, abs(alpha_rad) * 0.4), 5),
+            },
+        }
+    except Exception as exc:
+        logger.error(f"Flow-field generation error: {exc}")
+        raise HTTPException(status_code=500, detail=f"Flow-field generation error: {exc}")
+
+
+@app.post("/api/v1/panel-solve")
+async def panel_solve(request: PanelSolveRequest):
+    """
+    Generate panel-method compatible visualization payload.
+    """
+    try:
+        n_span = 18
+        n_chord = 14
+        alpha_rad = math.radians(request.alpha)
+        velocity_scale = request.velocity / 70.0
+
+        panels = []
+        source_strength = []
+        streamlines = []
+
+        for i in range(n_span):
+            for j in range(n_chord):
+                y = (i - n_span / 2) * 0.1
+                x1 = j * 0.055
+                x2 = (j + 1) * 0.055
+                camber = 0.02 * math.sin(j / max(n_chord - 1, 1) * math.pi)
+
+                panels.append({
+                    "vertices": [
+                        [round(y, 5), round(camber, 5), round(x1, 5)],
+                        [round(y + 0.1, 5), round(camber, 5), round(x1, 5)],
+                        [round(y + 0.1, 5), round(camber, 5), round(x2, 5)],
+                    ],
+                    "indices": [0, 1, 2],
+                })
+                panels.append({
+                    "vertices": [
+                        [round(y, 5), round(camber, 5), round(x1, 5)],
+                        [round(y + 0.1, 5), round(camber, 5), round(x2, 5)],
+                        [round(y, 5), round(camber, 5), round(x2, 5)],
+                    ],
+                    "indices": [0, 1, 2],
+                })
+
+                strength = math.exp(-j / 4.8) * (1 + 0.2 * math.sin(alpha_rad)) * velocity_scale
+                source_strength.append(round(strength, 6))
+                source_strength.append(round(strength, 6))
+
+        for idx in range(16):
+            y = (idx - 8) * 0.14
+            points = []
+            for step in range(32):
+                x = -0.25 + step * 0.045
+                z = 0.08 + math.sin(x * 5 + alpha_rad) * 0.025
+                points.append([round(y, 5), round(z, 5), round(x, 5)])
+            streamlines.append({"points": points})
+
+        cl = round(2.1 + 0.075 * request.alpha + 0.08 * velocity_scale, 5)
+        cd = round(max(0.03, 0.32 + 0.012 * abs(request.alpha) + 0.02 * velocity_scale), 5)
+        cm = round(-0.11 - 0.008 * request.alpha, 5)
+
+        return {
+            "mesh_id": request.mesh_id,
+            "panels": panels,
+            "sourceStrength": source_strength,
+            "streamlines": streamlines,
+            "coefficients": {
+                "Cl": cl,
+                "Cd": cd,
+                "Cm": cm,
+            },
+            "pressureCoefficients": [round(-2.0 * value, 6) for value in source_strength],
+        }
+    except Exception as exc:
+        logger.error(f"Panel-solve generation error: {exc}")
+        raise HTTPException(status_code=500, detail=f"Panel-solve generation error: {exc}")
+
+
+@app.post("/api/vlm/batch-simulate")
+async def batch_simulate(request: BatchSimulateRequest):
+    """
+    Generate synthetic batch VLM-like samples for dataset pipelines.
+    """
+    try:
+        v_min = min(request.speed_range[0], request.speed_range[1])
+        v_max = max(request.speed_range[0], request.speed_range[1])
+        yaw_min = min(request.yaw_range[0], request.yaw_range[1])
+        yaw_max = max(request.yaw_range[0], request.yaw_range[1])
+
+        sample_preview = []
+        preview_count = min(request.n_samples, 25)
+        for idx in range(preview_count):
+            progress = idx / max(preview_count - 1, 1)
+            speed = v_min + (v_max - v_min) * progress
+            yaw = yaw_min + (yaw_max - yaw_min) * ((idx * 7) % preview_count) / max(preview_count - 1, 1)
+            cl = 1.85 + 0.0045 * speed - 0.022 * abs(yaw)
+            cd = 0.18 + 0.0014 * speed + 0.008 * abs(yaw)
+
+            sample_preview.append({
+                "sample_id": idx + 1,
+                "speed_kmh": round(speed, 4),
+                "yaw_deg": round(yaw, 4),
+                "cl": round(cl, 6),
+                "cd": round(cd, 6),
+                "l_over_d": round(cl / max(cd, 1e-6), 6),
+            })
+
+        avg_cl = sum(item["cl"] for item in sample_preview) / max(len(sample_preview), 1)
+        avg_cd = sum(item["cd"] for item in sample_preview) / max(len(sample_preview), 1)
+
+        return {
+            "status": "completed",
+            "n_samples": request.n_samples,
+            "speed_range": [v_min, v_max],
+            "yaw_range": [yaw_min, yaw_max],
+            "summary": {
+                "avg_cl_preview": round(avg_cl, 6),
+                "avg_cd_preview": round(avg_cd, 6),
+                "avg_l_over_d_preview": round(avg_cl / max(avg_cd, 1e-6), 6),
+            },
+            "samples_preview": sample_preview,
+        }
+    except Exception as exc:
+        logger.error(f"Batch simulation error: {exc}")
+        raise HTTPException(status_code=500, detail=f"Batch simulation error: {exc}")
 
 
 if __name__ == "__main__":

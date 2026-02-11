@@ -1,0 +1,53 @@
+# Quantum-Aero F1 Prototype - Production Profile Overrides
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.production.yml --profile production up --build -d
+
+services:
+  mongodb:
+    profiles: ["production"]
+
+  redis:
+    profiles: ["production"]
+
+  nats:
+    profiles: ["production"]
+
+  backend:
+    profiles: ["production"]
+    env_file:
+      - ./services/backend/.env.example
+    environment:
+      - NODE_ENV=production
+      - BACKEND_PUBLIC_URL=${BACKEND_PUBLIC_URL:-http://localhost:3001}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost:3000}
+      - REQUIRE_DATABASE=${REQUIRE_DATABASE:-true}
+      - REQUIRE_REDIS=${REQUIRE_REDIS:-false}
+      - ENABLE_RATE_LIMIT=${ENABLE_RATE_LIMIT:-true}
+
+  physics-engine:
+    profiles: ["production"]
+
+  ml-surrogate:
+    profiles: ["production"]
+
+  quantum-optimizer:
+    profiles: ["production"]
+
+  frontend:
+    profiles: ["production"]
+    image: node:20-alpine
+    container_name: qaero-frontend
+    restart: unless-stopped
+    working_dir: /app
+    command: sh -c "npm ci && npm run build && npx serve -s build -l 3000"
+    env_file:
+      - ./frontend/.env.example
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_started
+    networks:
+      - qaero-network

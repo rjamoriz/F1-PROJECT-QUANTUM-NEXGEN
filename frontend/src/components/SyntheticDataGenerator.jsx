@@ -3,8 +3,9 @@
  * Controls and monitors F1 aerodynamic data generation pipeline
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
+import { BACKEND_API_BASE } from '../config/endpoints';
 
 const SyntheticDataGenerator = () => {
   const [config, setConfig] = useState({
@@ -33,14 +34,14 @@ const SyntheticDataGenerator = () => {
     try {
       // Step 1: Generate NACA airfoil profiles
       addLog('Generating NACA airfoil profiles...');
-      await axios.post('http://localhost:3001/api/data/generate-airfoils', {
+      await axios.post(`${BACKEND_API_BASE}/api/data/generate-airfoils`, {
         n_profiles: config.geometry_variations
       });
       setProgress(20);
 
       // Step 2: Build F1 geometry variations
       addLog('Building F1 geometry variations...');
-      await axios.post('http://localhost:3001/api/data/generate-geometry', {
+      await axios.post(`${BACKEND_API_BASE}/api/data/generate-geometry`, {
         n_variations: config.geometry_variations,
         components: ['front_wing', 'rear_wing', 'floor', 'diffuser']
       });
@@ -48,7 +49,7 @@ const SyntheticDataGenerator = () => {
 
       // Step 3: Run VLM simulations
       addLog('Running VLM simulations...');
-      const vlmResponse = await axios.post('http://localhost:8001/api/vlm/batch-simulate', {
+      await axios.post(`${BACKEND_API_BASE}/api/physics/vlm/batch-simulate`, {
         n_samples: config.n_samples,
         speed_range: config.speed_range,
         yaw_range: config.yaw_range
@@ -58,7 +59,7 @@ const SyntheticDataGenerator = () => {
       // Step 4: Generate transient scenarios (if enabled)
       if (config.include_transient) {
         addLog('Generating transient scenarios...');
-        await axios.post('http://localhost:3001/api/transient/generate-scenarios', {
+        await axios.post(`${BACKEND_API_BASE}/api/transient/generate-scenarios`, {
           scenarios: ['corner_exit', 'drs_cycle', 'kerb_strike']
         });
         setProgress(80);
@@ -66,7 +67,7 @@ const SyntheticDataGenerator = () => {
 
       // Step 5: Store in HDF5 dataset
       addLog('Storing dataset in HDF5 format...');
-      const datasetResponse = await axios.post('http://localhost:3001/api/data/store-dataset', {
+      const datasetResponse = await axios.post(`${BACKEND_API_BASE}/api/data/store-dataset`, {
         format: 'hdf5',
         metadata: {
           n_samples: config.n_samples,

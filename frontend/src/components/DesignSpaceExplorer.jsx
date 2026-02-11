@@ -3,9 +3,10 @@
  * Interactive multi-dimensional parameter exploration with real-time ML preview
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { Sliders, RefreshCw, Save, Download } from 'lucide-react';
+import { Sliders, RefreshCw, Save, Download } from './lucideShim';
+import { BACKEND_API_BASE } from '../config/endpoints';
 
 const DesignSpaceExplorer = () => {
   const [parameters, setParameters] = useState({
@@ -20,7 +21,6 @@ const DesignSpaceExplorer = () => {
   const [prediction, setPrediction] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [savedConfigs, setSavedConfigs] = useState([]);
-  const [heatmapData, setHeatmapData] = useState(null);
 
   // Parameter ranges and constraints
   const parameterRanges = {
@@ -32,18 +32,10 @@ const DesignSpaceExplorer = () => {
     thickness: { min: 1.0, max: 2.5, step: 0.1, unit: 'mm', constraint: 'Min 1mm for strength' }
   };
 
-  useEffect(() => {
-    // Debounced prediction update
-    const timer = setTimeout(() => {
-      updatePrediction();
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [parameters]);
-
-  const updatePrediction = async () => {
+  const updatePrediction = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await axios.post('http://localhost:8000/api/v1/predict-forces', {
+      const response = await axios.post(`${BACKEND_API_BASE}/api/ml/predict-forces`, {
         parameters
       });
       setPrediction(response.data);
@@ -58,7 +50,15 @@ const DesignSpaceExplorer = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [parameters]);
+
+  useEffect(() => {
+    // Debounced prediction update
+    const timer = setTimeout(() => {
+      updatePrediction();
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [updatePrediction]);
 
   const handleParameterChange = (param, value) => {
     setParameters(prev => ({

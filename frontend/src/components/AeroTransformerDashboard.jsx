@@ -1,420 +1,515 @@
 /**
  * AeroTransformer Dashboard
- * Monitor and control Vision Transformer + U-Net CFD model
- * Target: <50ms inference time
+ * Phase 1 runtime dashboard for ML surrogate contracts
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
-import { Brain, Zap, TrendingUp, Clock, Database, Play, Pause, BarChart3 } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { BACKEND_API_BASE } from '../config/endpoints';
+import {
+  Activity,
+  BarChart3,
+  Brain,
+  Database,
+  RefreshCw,
+  TrendingUp,
+  Zap,
+} from './lucideShim';
+import {
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
+
+const API_BASE = BACKEND_API_BASE;
+const HISTORY_LIMIT = 40;
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function safeNumber(value, fallback = 0) {
+  return Number.isFinite(Number(value)) ? Number(value) : fallback;
+}
+
+function unwrapData(response) {
+  if (!response || typeof response !== 'object') {
+    return null;
+  }
+  if (response.data && Object.prototype.hasOwnProperty.call(response.data, 'data')) {
+    return response.data.data;
+  }
+  return response.data || null;
+}
 
 const AeroTransformerDashboard = () => {
-  const [trainingStatus, setTrainingStatus] = useState(null);
-  const [benchmarkResults, setBenchmarkResults] = useState(null);
+  const [health, setHealth] = useState(null);
+  const [runtimeStats, setRuntimeStats] = useState(null);
   const [models, setModels] = useState([]);
-  const [selectedModel, setSelectedModel] = useState(null);
-  const [predictionResult, setPredictionResult] = useState(null);
-  
-  const [trainingConfig, setTrainingConfig] = useState({
-    model_size: 'base',
-    batch_size: 4,
-    learning_rate: 0.0001,
-    epochs: 100,
-    dataset_path: 'data/cfd_dataset'
-  });
 
-  useEffect(() => {
-    loadModels();
-    loadTrainingStatus();
-    
-    // Poll training status every 5 seconds
-    const interval = setInterval(loadTrainingStatus, 5000);
-    return () => clearInterval(interval);
+  const [predictionInput, setPredictionInput] = useState({
+    mesh_id: 'f1_front_wing_baseline',
+    velocity: 72,
+    alpha: 4.5,
+    yaw: 0.5,
+    rho: 1.225,
+  });
+  const [benchmarkIterations, setBenchmarkIterations] = useState(12);
+
+  const [predictionResult, setPredictionResult] = useState(null);
+  const [predictionHistory, setPredictionHistory] = useState([]);
+  const [benchmarkResults, setBenchmarkResults] = useState(null);
+
+  const [isLoadingRuntime, setIsLoadingRuntime] = useState(false);
+  const [isPredicting, setIsPredicting] = useState(false);
+  const [isBenchmarking, setIsBenchmarking] = useState(false);
+  const [isClearingCache, setIsClearingCache] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
+
+  const loadRuntime = useCallback(async () => {
+    setIsLoadingRuntime(true);
+    setErrorMessage(null);
+
+    const [healthResult, modelsResult, statsResult] = await Promise.allSettled([
+      axios.get(`${API_BASE}/api/ml/health`),
+      axios.get(`${API_BASE}/api/ml/models`),
+      axios.get(`${API_BASE}/api/ml/stats`),
+    ]);
+
+    if (healthResult.status === 'fulfilled') {
+      const payload = healthResult.value?.data || {};
+      setHealth(payload);
+    }
+
+    if (modelsResult.status === 'fulfilled') {
+      const payload = unwrapData(modelsResult.value);
+      setModels(Array.isArray(payload) ? payload : []);
+    }
+
+    if (statsResult.status === 'fulfilled') {
+      const payload = unwrapData(statsResult.value);
+      setRuntimeStats(payload || null);
+    }
+
+    const failed = [healthResult, modelsResult, statsResult].filter((entry) => entry.status === 'rejected');
+    if (failed.length > 0) {
+      const firstError = failed[0].reason;
+      setErrorMessage(firstError?.message || 'Runtime service refresh failed');
+    }
+
+    setIsLoadingRuntime(false);
   }, []);
 
-  const loadModels = async () => {
-    try {
-      const response = await axios.get('http://localhost:8003/api/ml/aerotransformer/models');
-      setModels(response.data.models);
-    } catch (error) {
-      console.error('Failed to load models:', error);
-      // Mock data
-      setModels([
-        { filename: 'best_model.pt', size_mb: 450.5, modified: '2026-01-15T10:30:00' },
-        { filename: 'checkpoint_epoch_50.pt', size_mb: 450.2, modified: '2026-01-14T15:20:00' }
-      ]);
-    }
-  };
+  useEffect(() => {
+    loadRuntime();
+    const interval = setInterval(loadRuntime, 8000);
+    return () => clearInterval(interval);
+  }, [loadRuntime]);
 
-  const loadTrainingStatus = async () => {
+  const runPredictRequest = useCallback(async ({ meshId, useCache }) => {
+    const requestPayload = {
+      mesh_id: meshId,
+      parameters: {
+        velocity: safeNumber(predictionInput.velocity, 72),
+        alpha: safeNumber(predictionInput.alpha, 4.5),
+        yaw: safeNumber(predictionInput.yaw, 0.5),
+        rho: safeNumber(predictionInput.rho, 1.225),
+      },
+      use_cache: useCache,
+      return_confidence: true,
+    };
+
+    const started = performance.now();
+    const response = await axios.post(`${API_BASE}/api/ml/predict`, requestPayload);
+    const finished = performance.now();
+
+    const prediction = unwrapData(response) || {};
+    const roundTripMs = finished - started;
+
+    return {
+      ...prediction,
+      mesh_id: meshId,
+      round_trip_ms: roundTripMs,
+      timestamp: new Date().toISOString(),
+      cached: response?.data?.cached ?? prediction.cached ?? false,
+    };
+  }, [predictionInput]);
+
+  const runPrediction = async (useCache = true) => {
     try {
-      const response = await axios.get('http://localhost:8003/api/ml/aerotransformer/train-status');
-      setTrainingStatus(response.data);
-    } catch (error) {
-      // Mock status
-      setTrainingStatus({
-        is_training: false,
-        current_epoch: 0,
-        total_epochs: 0,
-        train_loss: 0.0,
-        val_loss: 0.0,
-        elapsed_time: null
+      setIsPredicting(true);
+      setErrorMessage(null);
+
+      const result = await runPredictRequest({
+        meshId: predictionInput.mesh_id,
+        useCache,
       });
-    }
-  };
 
-  const startTraining = async () => {
-    try {
-      await axios.post('http://localhost:8003/api/ml/aerotransformer/train', trainingConfig);
-      alert('Training started! Check status below.');
-      loadTrainingStatus();
+      setPredictionResult(result);
+      setPredictionHistory((prev) => [...prev, result].slice(-HISTORY_LIMIT));
+      await loadRuntime();
     } catch (error) {
-      alert('Failed to start training: ' + error.message);
+      setErrorMessage(error?.response?.data?.error?.message || error.message || 'Prediction failed');
+    } finally {
+      setIsPredicting(false);
     }
   };
 
   const runBenchmark = async () => {
+    const totalRuns = clamp(parseInt(benchmarkIterations, 10) || 8, 4, 30);
+
     try {
-      const response = await axios.get('http://localhost:8003/api/ml/aerotransformer/benchmark?num_iterations=100');
-      setBenchmarkResults(response.data);
-    } catch (error) {
-      // Mock benchmark
+      setIsBenchmarking(true);
+      setErrorMessage(null);
+
+      const runs = [];
+      for (let i = 0; i < totalRuns; i += 1) {
+        const meshId = `${predictionInput.mesh_id}_bench_${i + 1}_${Date.now()}`;
+        const result = await runPredictRequest({ meshId, useCache: false });
+        runs.push(result);
+      }
+
+      const roundTrips = runs.map((run) => safeNumber(run.round_trip_ms, 0));
+      const inferenceTimes = runs.map((run) => safeNumber(run.inference_time_ms, 0));
+      const sorted = [...roundTrips].sort((a, b) => a - b);
+      const p95Index = Math.max(0, Math.floor(0.95 * (sorted.length - 1)));
+      const meanRoundTrip = roundTrips.reduce((sum, value) => sum + value, 0) / roundTrips.length;
+      const meanInference = inferenceTimes.reduce((sum, value) => sum + value, 0) / inferenceTimes.length;
+
       setBenchmarkResults({
-        mean_ms: 42.5,
-        std_ms: 3.2,
-        min_ms: 38.1,
-        max_ms: 51.3,
-        median_ms: 41.8,
-        p95_ms: 48.2,
-        p99_ms: 50.1,
-        target_met: true
-      });
-    }
-  };
-
-  const runPrediction = async () => {
-    try {
-      // Generate mock geometry
-      const geometry = Array(3).fill(0).map(() =>
-        Array(64).fill(0).map(() =>
-          Array(64).fill(0).map(() =>
-            Array(64).fill(0).map(() => Math.random() * 2 - 1)
-          )
-        )
-      );
-
-      const response = await axios.post('http://localhost:8003/api/ml/aerotransformer/predict', {
-        geometry,
-        return_timing: true
+        runs: totalRuns,
+        mean_round_trip_ms: meanRoundTrip,
+        mean_inference_ms: meanInference,
+        min_round_trip_ms: Math.min(...roundTrips),
+        max_round_trip_ms: Math.max(...roundTrips),
+        p95_round_trip_ms: sorted[p95Index],
+        target_met: meanInference < 50,
       });
 
-      setPredictionResult(response.data);
+      setPredictionResult(runs[runs.length - 1]);
+      setPredictionHistory((prev) => [...prev, ...runs].slice(-HISTORY_LIMIT));
+      await loadRuntime();
     } catch (error) {
-      // Mock prediction
-      setPredictionResult({
-        inference_time_ms: 45.2,
-        pressure: Array(64).fill(0).map(() => Array(64).fill(0).map(() => Array(64).fill(0))),
-        velocity: Array(3).fill(0).map(() => Array(64).fill(0).map(() => Array(64).fill(0).map(() => Array(64).fill(0)))),
-        turbulence: Array(3).fill(0).map(() => Array(64).fill(0).map(() => Array(64).fill(0).map(() => Array(64).fill(0))))
-      });
+      setErrorMessage(error?.response?.data?.error?.message || error.message || 'Benchmark failed');
+    } finally {
+      setIsBenchmarking(false);
     }
   };
 
-  const formatTime = (seconds) => {
-    if (!seconds) return '-';
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${hours}h ${minutes}m ${secs}s`;
+  const clearCache = async () => {
+    try {
+      setIsClearingCache(true);
+      setErrorMessage(null);
+      await axios.post(`${API_BASE}/api/ml/cache/clear`, {});
+      await loadRuntime();
+    } catch (error) {
+      setErrorMessage(error?.response?.data?.error?.message || error.message || 'Cache clear failed');
+    } finally {
+      setIsClearingCache(false);
+    }
   };
+
+  const cacheStats = runtimeStats?.cache || {};
+  const predictorStats = runtimeStats?.predictor || {};
+  const cacheRequests = safeNumber(cacheStats.requests, 0);
+  const cacheHits = safeNumber(cacheStats.hits, 0);
+  const cacheHitRate = cacheRequests > 0 ? (cacheHits / cacheRequests) * 100 : 0;
+
+  const historySeries = useMemo(() => (
+    predictionHistory.map((point, index) => ({
+      idx: index + 1,
+      round_trip_ms: safeNumber(point.round_trip_ms, 0),
+      inference_time_ms: safeNumber(point.inference_time_ms, 0),
+      cl: safeNumber(point.cl, 0),
+      cd: safeNumber(point.cd, 0),
+    }))
+  ), [predictionHistory]);
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-lg">
       <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-        <Brain className="w-6 h-6 text-purple-600" />
-        AeroTransformer Dashboard
+        <Brain className="w-6 h-6 text-blue-600" />
+        ML Surrogate Runtime Dashboard
       </h2>
 
       <p className="text-gray-600 mb-6">
-        Vision Transformer + U-Net hybrid for 3D flow field prediction. Target: &lt;50ms inference on RTX 4090.
+        Phase 1 contract view for `/api/ml/*`: runtime health, deterministic inference, cache behavior, and benchmark loop.
       </p>
 
-      {/* Model Status */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
-        <div className="p-4 bg-purple-50 border border-purple-200 rounded">
-          <div className="flex items-center gap-2 mb-2">
-            <Brain className="w-5 h-5 text-purple-600" />
-            <span className="text-sm text-purple-700">Model Size</span>
-          </div>
-          <div className="text-2xl font-bold text-purple-900">{trainingConfig.model_size.toUpperCase()}</div>
-          <div className="text-xs text-purple-600">~100M parameters</div>
+      {errorMessage && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+          {String(errorMessage)}
         </div>
+      )}
 
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div className="p-4 bg-blue-50 border border-blue-200 rounded">
           <div className="flex items-center gap-2 mb-2">
-            <Database className="w-5 h-5 text-blue-600" />
-            <span className="text-sm text-blue-700">Dataset</span>
+            <Activity className="w-4 h-4 text-blue-600" />
+            <span className="text-sm text-blue-700">Service Health</span>
           </div>
-          <div className="text-2xl font-bold text-blue-900">100K+</div>
-          <div className="text-xs text-blue-600">RANS/LES simulations</div>
+          <div className="text-2xl font-bold text-blue-900">{health?.healthy ? 'ONLINE' : 'DEGRADED'}</div>
+          <div className="text-xs text-blue-600">{health?.status || runtimeStats?.mode || 'unknown'}</div>
         </div>
 
         <div className="p-4 bg-green-50 border border-green-200 rounded">
           <div className="flex items-center gap-2 mb-2">
-            <Zap className="w-5 h-5 text-green-600" />
-            <span className="text-sm text-green-700">Inference Target</span>
+            <Zap className="w-4 h-4 text-green-600" />
+            <span className="text-sm text-green-700">Mean Inference</span>
           </div>
-          <div className="text-2xl font-bold text-green-900">&lt;50ms</div>
-          <div className="text-xs text-green-600">RTX 4090</div>
+          <div className="text-2xl font-bold text-green-900">{safeNumber(predictorStats.avg_inference_ms, 0).toFixed(2)}ms</div>
+          <div className="text-xs text-green-600">{runtimeStats?.mode || 'unknown mode'}</div>
         </div>
 
-        <div className="p-4 bg-orange-50 border border-orange-200 rounded">
+        <div className="p-4 bg-purple-50 border border-purple-200 rounded">
           <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="w-5 h-5 text-orange-600" />
-            <span className="text-sm text-orange-700">Training Status</span>
+            <Database className="w-4 h-4 text-purple-600" />
+            <span className="text-sm text-purple-700">Cache Hit Rate</span>
           </div>
-          <div className="text-2xl font-bold text-orange-900">
-            {trainingStatus?.is_training ? 'RUNNING' : 'IDLE'}
+          <div className="text-2xl font-bold text-purple-900">{cacheHitRate.toFixed(1)}%</div>
+          <div className="text-xs text-purple-600">{cacheHits}/{cacheRequests} hits</div>
+        </div>
+
+        <div className="p-4 bg-amber-50 border border-amber-200 rounded">
+          <div className="flex items-center gap-2 mb-2">
+            <TrendingUp className="w-4 h-4 text-amber-600" />
+            <span className="text-sm text-amber-700">Total Predictions</span>
           </div>
-          <div className="text-xs text-orange-600">
-            {trainingStatus?.is_training ? `Epoch ${trainingStatus.current_epoch}/${trainingStatus.total_epochs}` : 'Ready'}
-          </div>
+          <div className="text-2xl font-bold text-amber-900">{safeNumber(predictorStats.total_predictions, 0)}</div>
+          <div className="text-xs text-amber-600">Recent history: {predictionHistory.length}</div>
         </div>
       </div>
 
-      {/* Training Configuration */}
-      <div className="mb-6 p-4 bg-gray-50 rounded border border-gray-200">
-        <h3 className="font-semibold mb-3 flex items-center gap-2">
-          <Play className="w-5 h-5" />
-          Training Configuration
-        </h3>
+      <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded">
+        <h3 className="font-semibold mb-3">Prediction Controls</h3>
 
-        <div className="grid grid-cols-3 gap-4 mb-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4 text-sm">
           <div>
-            <label className="block text-sm font-medium mb-1">Model Size</label>
-            <select
-              value={trainingConfig.model_size}
-              onChange={(e) => setTrainingConfig({...trainingConfig, model_size: e.target.value})}
-              className="w-full px-3 py-2 border rounded"
-              disabled={trainingStatus?.is_training}
-            >
-              <option value="tiny">Tiny (20M params)</option>
-              <option value="small">Small (40M params)</option>
-              <option value="base">Base (100M params)</option>
-              <option value="large">Large (300M params)</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Batch Size</label>
-            <input
-              type="number"
-              value={trainingConfig.batch_size}
-              onChange={(e) => setTrainingConfig({...trainingConfig, batch_size: parseInt(e.target.value)})}
-              className="w-full px-3 py-2 border rounded"
-              disabled={trainingStatus?.is_training}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Learning Rate</label>
-            <input
-              type="number"
-              step="0.00001"
-              value={trainingConfig.learning_rate}
-              onChange={(e) => setTrainingConfig({...trainingConfig, learning_rate: parseFloat(e.target.value)})}
-              className="w-full px-3 py-2 border rounded"
-              disabled={trainingStatus?.is_training}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Epochs</label>
-            <input
-              type="number"
-              value={trainingConfig.epochs}
-              onChange={(e) => setTrainingConfig({...trainingConfig, epochs: parseInt(e.target.value)})}
-              className="w-full px-3 py-2 border rounded"
-              disabled={trainingStatus?.is_training}
-            />
-          </div>
-
-          <div className="col-span-2">
-            <label className="block text-sm font-medium mb-1">Dataset Path</label>
+            <label className="block mb-1">Mesh ID</label>
             <input
               type="text"
-              value={trainingConfig.dataset_path}
-              onChange={(e) => setTrainingConfig({...trainingConfig, dataset_path: e.target.value})}
-              className="w-full px-3 py-2 border rounded"
-              disabled={trainingStatus?.is_training}
+              value={predictionInput.mesh_id}
+              onChange={(e) => setPredictionInput({ ...predictionInput, mesh_id: e.target.value })}
+              className="w-full px-2 py-1 border rounded"
+            />
+          </div>
+          <div>
+            <label className="block mb-1">Velocity</label>
+            <input
+              type="number"
+              value={predictionInput.velocity}
+              onChange={(e) => setPredictionInput({ ...predictionInput, velocity: parseFloat(e.target.value) || 0 })}
+              className="w-full px-2 py-1 border rounded"
+            />
+          </div>
+          <div>
+            <label className="block mb-1">Alpha</label>
+            <input
+              type="number"
+              step="0.1"
+              value={predictionInput.alpha}
+              onChange={(e) => setPredictionInput({ ...predictionInput, alpha: parseFloat(e.target.value) || 0 })}
+              className="w-full px-2 py-1 border rounded"
+            />
+          </div>
+          <div>
+            <label className="block mb-1">Yaw</label>
+            <input
+              type="number"
+              step="0.1"
+              value={predictionInput.yaw}
+              onChange={(e) => setPredictionInput({ ...predictionInput, yaw: parseFloat(e.target.value) || 0 })}
+              className="w-full px-2 py-1 border rounded"
+            />
+          </div>
+          <div>
+            <label className="block mb-1">Rho</label>
+            <input
+              type="number"
+              step="0.001"
+              value={predictionInput.rho}
+              onChange={(e) => setPredictionInput({ ...predictionInput, rho: parseFloat(e.target.value) || 0 })}
+              className="w-full px-2 py-1 border rounded"
             />
           </div>
         </div>
 
-        <button
-          onClick={startTraining}
-          disabled={trainingStatus?.is_training}
-          className={`w-full px-6 py-3 rounded font-semibold ${
-            trainingStatus?.is_training
-              ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-purple-600 hover:bg-purple-700 text-white'
-          }`}
-        >
-          {trainingStatus?.is_training ? 'Training in Progress...' : 'Start Training'}
-        </button>
-      </div>
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={() => runPrediction(true)}
+            disabled={isPredicting || isBenchmarking}
+            className={`px-4 py-2 rounded text-white ${isPredicting || isBenchmarking ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
+          >
+            Predict (cache on)
+          </button>
 
-      {/* Training Progress */}
-      {trainingStatus?.is_training && (
-        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded">
-          <h3 className="font-semibold mb-3">Training Progress</h3>
+          <button
+            onClick={() => runPrediction(false)}
+            disabled={isPredicting || isBenchmarking}
+            className={`px-4 py-2 rounded text-white ${isPredicting || isBenchmarking ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'}`}
+          >
+            Predict (cache off)
+          </button>
 
-          <div className="mb-3">
-            <div className="flex justify-between text-sm mb-1">
-              <span>Epoch {trainingStatus.current_epoch} / {trainingStatus.total_epochs}</span>
-              <span>{((trainingStatus.current_epoch / trainingStatus.total_epochs) * 100).toFixed(1)}%</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-3">
-              <div
-                className="bg-blue-600 h-3 rounded-full transition-all duration-300"
-                style={{ width: `${(trainingStatus.current_epoch / trainingStatus.total_epochs) * 100}%` }}
-              />
-            </div>
+          <div className="flex items-center gap-2 border rounded px-2 py-1 bg-white">
+            <span className="text-sm">Benchmark runs</span>
+            <input
+              type="number"
+              min="4"
+              max="30"
+              value={benchmarkIterations}
+              onChange={(e) => setBenchmarkIterations(clamp(parseInt(e.target.value, 10) || 4, 4, 30))}
+              className="w-16 px-2 py-1 border rounded"
+            />
           </div>
 
-          <div className="grid grid-cols-3 gap-4 text-sm">
-            <div>
-              <span className="text-gray-600">Train Loss:</span>
-              <span className="ml-2 font-bold">{trainingStatus.train_loss.toFixed(4)}</span>
+          <button
+            onClick={runBenchmark}
+            disabled={isBenchmarking || isPredicting}
+            className={`px-4 py-2 rounded text-white ${isBenchmarking || isPredicting ? 'bg-gray-400 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-700'}`}
+          >
+            {isBenchmarking ? 'Benchmarking...' : 'Run Benchmark'}
+          </button>
+
+          <button
+            onClick={clearCache}
+            disabled={isClearingCache || isPredicting || isBenchmarking}
+            className={`px-4 py-2 rounded text-white ${isClearingCache || isPredicting || isBenchmarking ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-600 hover:bg-orange-700'}`}
+          >
+            {isClearingCache ? 'Clearing...' : 'Clear Cache'}
+          </button>
+
+          <button
+            onClick={loadRuntime}
+            disabled={isLoadingRuntime}
+            className={`px-4 py-2 rounded border ${isLoadingRuntime ? 'bg-gray-100 text-gray-400 border-gray-200' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}
+          >
+            <span className="inline-flex items-center gap-1">
+              <RefreshCw className="w-4 h-4" />
+              Refresh
+            </span>
+          </button>
+        </div>
+      </div>
+
+      {predictionResult && (
+        <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded">
+          <h3 className="font-semibold mb-3">Latest Prediction</h3>
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-3 text-sm">
+            <div className="p-2 bg-white border rounded">
+              <div className="text-xs text-gray-500">Mesh</div>
+              <div className="font-medium truncate">{predictionResult.mesh_id}</div>
             </div>
-            <div>
-              <span className="text-gray-600">Val Loss:</span>
-              <span className="ml-2 font-bold">{trainingStatus.val_loss.toFixed(4)}</span>
+            <div className="p-2 bg-white border rounded">
+              <div className="text-xs text-gray-500">CL</div>
+              <div className="font-bold text-blue-700">{safeNumber(predictionResult.cl, 0).toFixed(4)}</div>
             </div>
-            <div>
-              <span className="text-gray-600">Elapsed:</span>
-              <span className="ml-2 font-bold">{formatTime(trainingStatus.elapsed_time)}</span>
+            <div className="p-2 bg-white border rounded">
+              <div className="text-xs text-gray-500">CD</div>
+              <div className="font-bold text-red-700">{safeNumber(predictionResult.cd, 0).toFixed(4)}</div>
+            </div>
+            <div className="p-2 bg-white border rounded">
+              <div className="text-xs text-gray-500">L/D</div>
+              <div className="font-bold text-green-700">
+                {(safeNumber(predictionResult.cl, 0) / Math.max(safeNumber(predictionResult.cd, 1e-6), 1e-6)).toFixed(3)}
+              </div>
+            </div>
+            <div className="p-2 bg-white border rounded">
+              <div className="text-xs text-gray-500">Inference</div>
+              <div className="font-bold">{safeNumber(predictionResult.inference_time_ms, 0).toFixed(3)}ms</div>
+            </div>
+            <div className="p-2 bg-white border rounded">
+              <div className="text-xs text-gray-500">Round Trip</div>
+              <div className="font-bold">{safeNumber(predictionResult.round_trip_ms, 0).toFixed(3)}ms</div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Benchmark Results */}
-      <div className="mb-6 p-4 bg-gray-50 rounded border border-gray-200">
-        <div className="flex justify-between items-center mb-3">
-          <h3 className="font-semibold flex items-center gap-2">
-            <BarChart3 className="w-5 h-5" />
-            Performance Benchmark
+      {historySeries.length > 0 && (
+        <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded">
+          <h3 className="font-semibold mb-3 flex items-center gap-2">
+            <BarChart3 className="w-4 h-4" />
+            Prediction Timing History
           </h3>
-          <button
-            onClick={runBenchmark}
-            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded text-sm"
-          >
-            Run Benchmark
-          </button>
+          <ResponsiveContainer width="100%" height={260}>
+            <LineChart data={historySeries}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="idx" />
+              <YAxis yAxisId="left" />
+              <YAxis yAxisId="right" orientation="right" />
+              <Tooltip />
+              <Legend />
+              <Line yAxisId="left" type="monotone" dataKey="round_trip_ms" stroke="#2563eb" strokeWidth={2} dot={false} name="Round trip ms" />
+              <Line yAxisId="left" type="monotone" dataKey="inference_time_ms" stroke="#16a34a" strokeWidth={2} dot={false} name="Inference ms" />
+              <Line yAxisId="right" type="monotone" dataKey="cl" stroke="#7c3aed" strokeWidth={2} dot={false} name="CL" />
+              <Line yAxisId="right" type="monotone" dataKey="cd" stroke="#dc2626" strokeWidth={2} dot={false} name="CD" />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
+      )}
 
-        {benchmarkResults && (
-          <div>
-            <div className="grid grid-cols-4 gap-4 mb-4">
-              <div className="p-3 bg-white rounded border">
-                <div className="text-xs text-gray-600">Mean</div>
-                <div className={`text-2xl font-bold ${benchmarkResults.target_met ? 'text-green-600' : 'text-red-600'}`}>
-                  {benchmarkResults.mean_ms.toFixed(2)}ms
-                </div>
-              </div>
-              <div className="p-3 bg-white rounded border">
-                <div className="text-xs text-gray-600">Median</div>
-                <div className="text-2xl font-bold text-blue-600">
-                  {benchmarkResults.median_ms.toFixed(2)}ms
-                </div>
-              </div>
-              <div className="p-3 bg-white rounded border">
-                <div className="text-xs text-gray-600">P95</div>
-                <div className="text-2xl font-bold text-purple-600">
-                  {benchmarkResults.p95_ms.toFixed(2)}ms
-                </div>
-              </div>
-              <div className="p-3 bg-white rounded border">
-                <div className="text-xs text-gray-600">P99</div>
-                <div className="text-2xl font-bold text-orange-600">
-                  {benchmarkResults.p99_ms.toFixed(2)}ms
-                </div>
-              </div>
+      {benchmarkResults && (
+        <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded">
+          <h3 className="font-semibold mb-3">Benchmark Summary</h3>
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-3 text-sm">
+            <div className="p-2 bg-white border rounded">
+              <div className="text-xs text-gray-500">Runs</div>
+              <div className="font-bold">{benchmarkResults.runs}</div>
             </div>
-
-            <div className={`p-3 rounded text-center font-semibold ${
-              benchmarkResults.target_met
-                ? 'bg-green-100 text-green-800'
-                : 'bg-red-100 text-red-800'
-            }`}>
-              {benchmarkResults.target_met
-                ? '✓ Target Achieved (<50ms)'
-                : `✗ Target Not Met (${benchmarkResults.mean_ms.toFixed(2)}ms)`
-              }
+            <div className="p-2 bg-white border rounded">
+              <div className="text-xs text-gray-500">Mean Round Trip</div>
+              <div className="font-bold">{benchmarkResults.mean_round_trip_ms.toFixed(3)}ms</div>
+            </div>
+            <div className="p-2 bg-white border rounded">
+              <div className="text-xs text-gray-500">Mean Inference</div>
+              <div className="font-bold">{benchmarkResults.mean_inference_ms.toFixed(3)}ms</div>
+            </div>
+            <div className="p-2 bg-white border rounded">
+              <div className="text-xs text-gray-500">P95 Round Trip</div>
+              <div className="font-bold">{benchmarkResults.p95_round_trip_ms.toFixed(3)}ms</div>
+            </div>
+            <div className="p-2 bg-white border rounded">
+              <div className="text-xs text-gray-500">Min</div>
+              <div className="font-bold">{benchmarkResults.min_round_trip_ms.toFixed(3)}ms</div>
+            </div>
+            <div className="p-2 bg-white border rounded">
+              <div className="text-xs text-gray-500">Max</div>
+              <div className="font-bold">{benchmarkResults.max_round_trip_ms.toFixed(3)}ms</div>
             </div>
           </div>
-        )}
-      </div>
 
-      {/* Quick Prediction Test */}
-      <div className="mb-6 p-4 bg-gray-50 rounded border border-gray-200">
-        <div className="flex justify-between items-center mb-3">
-          <h3 className="font-semibold flex items-center gap-2">
-            <Zap className="w-5 h-5" />
-            Quick Prediction Test
-          </h3>
-          <button
-            onClick={runPrediction}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm"
-          >
-            Run Prediction
-          </button>
-        </div>
-
-        {predictionResult && (
-          <div className="grid grid-cols-3 gap-4">
-            <div className="p-3 bg-white rounded border">
-              <div className="text-xs text-gray-600">Inference Time</div>
-              <div className={`text-2xl font-bold ${predictionResult.inference_time_ms < 50 ? 'text-green-600' : 'text-red-600'}`}>
-                {predictionResult.inference_time_ms.toFixed(2)}ms
-              </div>
-            </div>
-            <div className="p-3 bg-white rounded border">
-              <div className="text-xs text-gray-600">Output Shape</div>
-              <div className="text-lg font-bold text-gray-800">
-                7 × 64³
-              </div>
-            </div>
-            <div className="p-3 bg-white rounded border">
-              <div className="text-xs text-gray-600">Fields</div>
-              <div className="text-sm font-mono text-gray-700">
-                p, u, v, w, k, ω, νt
-              </div>
-            </div>
+          <div className={`mt-3 p-3 rounded text-sm font-medium ${benchmarkResults.target_met ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+            {benchmarkResults.target_met
+              ? 'Inference target met: mean inference < 50ms'
+              : 'Inference target not met: tune model/hardware before race-critical runs'}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Available Models */}
-      <div className="p-4 bg-gray-50 rounded border border-gray-200">
-        <h3 className="font-semibold mb-3">Available Models</h3>
+      <div className="p-4 bg-gray-50 border border-gray-200 rounded">
+        <h3 className="font-semibold mb-3">Active Models</h3>
         <div className="space-y-2">
-          {models.map((model, idx) => (
-            <div key={idx} className="p-3 bg-white rounded border flex items-center justify-between">
+          {models.length === 0 && (
+            <div className="text-sm text-gray-500">No model metadata available.</div>
+          )}
+          {models.map((model) => (
+            <div key={`${model.name}-${model.device}`} className="p-3 bg-white border rounded text-sm flex justify-between gap-3">
               <div>
-                <div className="font-medium">{model.filename}</div>
-                <div className="text-xs text-gray-600">
-                  {model.size_mb.toFixed(1)} MB • Modified: {new Date(model.modified).toLocaleString()}
+                <div className="font-medium">{model.name}</div>
+                <div className="text-gray-600">
+                  {model.type} | params: {model.parameters} | input: [{(model.input_shape || []).join(', ')}] | output: [{(model.output_shape || []).join(', ')}]
                 </div>
               </div>
-              <button
-                onClick={() => setSelectedModel(model.filename)}
-                className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded text-sm"
-              >
-                Load
-              </button>
+              <div className="text-right">
+                <div className="font-medium">{model.device}</div>
+                <div className="text-xs text-gray-500">{model.status}</div>
+              </div>
             </div>
           ))}
         </div>

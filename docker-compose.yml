@@ -1,8 +1,6 @@
 # Quantum-Aero F1 Prototype - Docker Compose Configuration
 # Orchestrates all microservices for the platform
 
-version: '3.8'
-
 services:
   # ============================================================================
   # Infrastructure Services
@@ -54,6 +52,8 @@ services:
     restart: unless-stopped
     ports:
       - "3001:3001"
+    env_file:
+      - ./services/backend/.env.example
     environment:
       - NODE_ENV=production
       - PORT=3001
@@ -88,46 +88,48 @@ services:
     networks:
       - qaero-network
     healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8001/health')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health').read()"]
       interval: 30s
       timeout: 10s
       retries: 3
 
-  # ML Surrogate Service (to be implemented)
-  # ml-surrogate:
-  #   build:
-  #     context: ./services/ml-surrogate
-  #     dockerfile: Dockerfile
-  #   container_name: qaero-ml-surrogate
-  #   restart: unless-stopped
-  #   ports:
-  #     - "8000:8000"
-  #   environment:
-  #     - PYTHONUNBUFFERED=1
-  #     - CUDA_VISIBLE_DEVICES=0
-  #   deploy:
-  #     resources:
-  #       reservations:
-  #         devices:
-  #           - driver: nvidia
-  #             count: 1
-  #             capabilities: [gpu]
-  #   networks:
-  #     - qaero-network
+  ml-surrogate:
+    build:
+      context: ./services/ml-surrogate
+      dockerfile: Dockerfile
+    container_name: qaero-ml-surrogate
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOG_LEVEL=INFO
+    networks:
+      - qaero-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-  # Quantum Optimizer Service (to be implemented)
-  # quantum-optimizer:
-  #   build:
-  #     context: ./services/quantum-optimizer
-  #     dockerfile: Dockerfile
-  #   container_name: qaero-quantum-optimizer
-  #   restart: unless-stopped
-  #   ports:
-  #     - "8002:8002"
-  #   environment:
-  #     - PYTHONUNBUFFERED=1
-  #   networks:
-  #     - qaero-network
+  quantum-optimizer:
+    build:
+      context: ./services/quantum-optimizer
+      dockerfile: Dockerfile
+    container_name: qaero-quantum-optimizer
+    restart: unless-stopped
+    ports:
+      - "8002:8002"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOG_LEVEL=INFO
+    networks:
+      - qaero-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health').read()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # ============================================================================
   # GenAI Agents (Already deployed - from docker-compose.agents.yml)

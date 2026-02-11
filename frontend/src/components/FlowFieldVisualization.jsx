@@ -3,12 +3,13 @@
  * Advanced 3D flow visualization with velocity vectors, streamlines, and vorticity
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Line } from '@react-three/drei';
 import * as THREE from 'three';
 import axios from 'axios';
-import { Wind, Waves, Tornado } from 'lucide-react';
+import { Wind } from './lucideShim';
+import { BACKEND_API_BASE } from '../config/endpoints';
 
 // Velocity Vector Field
 const VelocityVectors = ({ vectors, scale }) => {
@@ -135,24 +136,7 @@ const FlowFieldVisualization = () => {
     alpha: 5.0
   });
 
-  useEffect(() => {
-    loadFlowData();
-  }, [parameters]);
-
-  const loadFlowData = async () => {
-    try {
-      const response = await axios.post('http://localhost:8001/api/v1/flow-field', {
-        mesh_id: 'wing_v3.2',
-        velocity: parameters.velocity / 3.6,
-        alpha: parameters.alpha
-      });
-      setFlowData(response.data);
-    } catch (error) {
-      setFlowData(generateMockFlowData());
-    }
-  };
-
-  const generateMockFlowData = () => {
+  const generateMockFlowData = useCallback(() => {
     const vectors = [];
     const streamlines = [];
     const vortexCores = [];
@@ -223,7 +207,24 @@ const FlowFieldVisualization = () => {
         turbulenceIntensity: 0.15
       }
     };
-  };
+  }, []);
+
+  const loadFlowData = useCallback(async () => {
+    try {
+      const response = await axios.post(`${BACKEND_API_BASE}/api/physics/v1/flow-field`, {
+        mesh_id: 'wing_v3.2',
+        velocity: parameters.velocity / 3.6,
+        alpha: parameters.alpha
+      });
+      setFlowData(response.data);
+    } catch (error) {
+      setFlowData(generateMockFlowData());
+    }
+  }, [generateMockFlowData, parameters.alpha, parameters.velocity]);
+
+  useEffect(() => {
+    loadFlowData();
+  }, [loadFlowData]);
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-lg">

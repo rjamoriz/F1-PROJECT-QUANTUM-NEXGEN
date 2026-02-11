@@ -3,9 +3,9 @@
  * Track 2026-2027 roadmap implementation progress
  */
 
-import React, { useState, useEffect } from 'react';
-import { TrendingUp, CheckCircle, Clock, AlertCircle, Target, Zap } from 'lucide-react';
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import React, { useState } from 'react';
+import { TrendingUp, CheckCircle, Clock, AlertCircle, Target, Zap } from './lucideShim';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const EvolutionProgressTracker = () => {
   const [selectedPhase, setSelectedPhase] = useState('phase1');
@@ -108,8 +108,6 @@ const EvolutionProgressTracker = () => {
       default: return <AlertCircle className="w-5 h-5 text-gray-400" />;
     }
   };
-
-  const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'];
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-lg">

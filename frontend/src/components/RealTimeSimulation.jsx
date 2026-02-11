@@ -3,9 +3,10 @@
  * WebSocket-based live quantum computations
  */
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Activity, Zap, Cpu, TrendingUp, Play, Square } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Activity, Zap, Cpu, TrendingUp, Play, Square } from './lucideShim';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { realtimeWsUrl } from '../config/endpoints';
 
 const RealTimeSimulation = () => {
   const [isConnected, setIsConnected] = useState(false);
@@ -24,48 +25,15 @@ const RealTimeSimulation = () => {
   const ws = useRef(null);
   const maxLogs = 50;
 
-  useEffect(() => {
-    // Connect to WebSocket
-    connectWebSocket();
-    
-    return () => {
-      if (ws.current) {
-        ws.current.close();
-      }
-    };
-  }, []);
+  const addLog = useCallback((message, level = 'info') => {
+    const timestamp = new Date().toLocaleTimeString();
+    setLogs(prev => {
+      const newLogs = [{ timestamp, message, level }, ...prev];
+      return newLogs.slice(0, maxLogs);
+    });
+  }, [maxLogs]);
 
-  const connectWebSocket = () => {
-    try {
-      ws.current = new WebSocket('ws://localhost:8010/ws/quantum');
-      
-      ws.current.onopen = () => {
-        setIsConnected(true);
-        addLog('✓ Connected to real-time server', 'success');
-      };
-      
-      ws.current.onclose = () => {
-        setIsConnected(false);
-        addLog('✗ Disconnected from server', 'error');
-        // Reconnect after 3 seconds
-        setTimeout(connectWebSocket, 3000);
-      };
-      
-      ws.current.onerror = (error) => {
-        addLog('✗ WebSocket error', 'error');
-      };
-      
-      ws.current.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        handleMessage(data);
-      };
-      
-    } catch (error) {
-      addLog('✗ Failed to connect to server', 'error');
-    }
-  };
-
-  const handleMessage = (data) => {
+  const handleMessage = useCallback((data) => {
     const { type } = data;
     
     switch (type) {
@@ -162,15 +130,48 @@ const RealTimeSimulation = () => {
       default:
         console.log('Unknown message type:', type, data);
     }
-  };
+  }, [addLog]);
 
-  const addLog = (message, level = 'info') => {
-    const timestamp = new Date().toLocaleTimeString();
-    setLogs(prev => {
-      const newLogs = [{ timestamp, message, level }, ...prev];
-      return newLogs.slice(0, maxLogs);
-    });
-  };
+  const connectWebSocket = useCallback(() => {
+    try {
+      ws.current = new WebSocket(realtimeWsUrl('/ws/quantum'));
+      
+      ws.current.onopen = () => {
+        setIsConnected(true);
+        addLog('✓ Connected to real-time server', 'success');
+      };
+      
+      ws.current.onclose = () => {
+        setIsConnected(false);
+        addLog('✗ Disconnected from server', 'error');
+        // Reconnect after 3 seconds
+        setTimeout(connectWebSocket, 3000);
+      };
+      
+      ws.current.onerror = (error) => {
+        addLog('✗ WebSocket error', 'error');
+      };
+      
+      ws.current.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        handleMessage(data);
+      };
+      
+    } catch (error) {
+      addLog('✗ Failed to connect to server', 'error');
+    }
+  }, [addLog, handleMessage]);
+
+  useEffect(() => {
+    // Connect to WebSocket
+    connectWebSocket();
+    
+    return () => {
+      if (ws.current) {
+        ws.current.close();
+      }
+    };
+  }, [connectWebSocket]);
 
   const sendCommand = (command, params = {}) => {
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {

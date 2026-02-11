@@ -3,7 +3,9 @@
  * Quantum-Aero F1 Prototype - Complete Integration
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import axios from 'axios';
+import { BACKEND_API_BASE } from './config/endpoints';
 import SyntheticDataGenerator from './components/SyntheticDataGenerator';
 import QuantumOptimizationPanel from './components/QuantumOptimizationPanel';
 import TransientScenarioRunner from './components/TransientScenarioRunner';
@@ -15,14 +17,62 @@ import DWaveAnnealingDashboard from './components/DWaveAnnealingDashboard';
 import GenerativeDesignStudio from './components/GenerativeDesignStudio';
 import EvolutionProgressTracker from './components/EvolutionProgressTracker';
 import RealTimeSimulation from './components/RealTimeSimulation';
+import VLMVisualization from './components/VLMVisualization';
+import MultiFidelityPipeline from './components/MultiFidelityPipeline';
+import SystemHealthDashboard from './components/SystemHealthDashboard';
+import JobOrchestrationDashboard from './components/JobOrchestrationDashboard';
+import WorkflowVisualizer from './components/WorkflowVisualizer';
+import AgentActivityMonitor from './components/AgentActivityMonitor';
 
 function App() {
   const [activeTab, setActiveTab] = useState('realtime');
   const [visualizationData, setVisualizationData] = useState(null);
+  const [systemHealth, setSystemHealth] = useState(null);
+
+  useEffect(() => {
+    const loadSystemHealth = async () => {
+      try {
+        const response = await axios.get(`${BACKEND_API_BASE}/api/system/health`);
+        setSystemHealth(response?.data?.data || null);
+      } catch (error) {
+        setSystemHealth(null);
+      }
+    };
+
+    loadSystemHealth();
+    const interval = setInterval(loadSystemHealth, 8000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const serviceMap = useMemo(() => {
+    const map = {};
+    (systemHealth?.services || []).forEach((service) => {
+      map[service.key] = service;
+    });
+    return map;
+  }, [systemHealth]);
+
+  const getIndicatorClass = (status) => {
+    if (status === 'healthy') return 'bg-green-500 animate-pulse';
+    if (status === 'degraded') return 'bg-yellow-500';
+    if (status === 'down') return 'bg-red-500';
+    return 'bg-gray-400';
+  };
+
+  const getStatusLabel = (status) => {
+    if (!status) return 'Unknown';
+    if (status === 'healthy') return 'Online';
+    if (status === 'degraded') return 'Degraded';
+    if (status === 'down') return 'Down';
+    return status;
+  };
 
   const tabs = [
     { id: 'realtime', label: 'Real-Time Simulation', icon: '⚡' },
+    { id: 'vlm_nodes', label: 'VLM Node Forces', icon: '🧩' },
     { id: 'overview', label: 'Overview', icon: '📊' },
+    { id: 'multifidelity', label: 'Multi-Fidelity', icon: '🧠' },
+    { id: 'operations', label: 'Operations', icon: '🛠️' },
     { id: 'aerotransformer', label: 'AeroTransformer', icon: '🚀' },
     { id: 'gnnrans', label: 'GNN-RANS', icon: '🔬' },
     { id: 'vqe', label: 'VQE Quantum', icon: '⚛️' },
@@ -74,26 +124,26 @@ function App() {
         <div className="mb-6 p-4 bg-white rounded-lg shadow flex justify-between items-center">
           <div className="flex space-x-6">
             <div className="flex items-center">
-              <div className="w-3 h-3 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-              <span className="text-sm font-medium">Backend: Online</span>
+              <div className={`w-3 h-3 rounded-full mr-2 ${getIndicatorClass(serviceMap.backend?.status)}`}></div>
+              <span className="text-sm font-medium">Backend: {getStatusLabel(serviceMap.backend?.status)}</span>
             </div>
             <div className="flex items-center">
-              <div className="w-3 h-3 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-              <span className="text-sm font-medium">Physics Engine: Ready</span>
+              <div className={`w-3 h-3 rounded-full mr-2 ${getIndicatorClass(serviceMap.physics?.status)}`}></div>
+              <span className="text-sm font-medium">Physics Engine: {getStatusLabel(serviceMap.physics?.status)}</span>
             </div>
             <div className="flex items-center">
-              <div className="w-3 h-3 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-              <span className="text-sm font-medium">ML Surrogate: Ready</span>
+              <div className={`w-3 h-3 rounded-full mr-2 ${getIndicatorClass(serviceMap.ml?.status)}`}></div>
+              <span className="text-sm font-medium">ML Surrogate: {getStatusLabel(serviceMap.ml?.status)}</span>
             </div>
             <div className="flex items-center">
-              <div className="w-3 h-3 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-              <span className="text-sm font-medium">Quantum Optimizer: Ready</span>
+              <div className={`w-3 h-3 rounded-full mr-2 ${getIndicatorClass(serviceMap.quantum?.status)}`}></div>
+              <span className="text-sm font-medium">Quantum Optimizer: {getStatusLabel(serviceMap.quantum?.status)}</span>
             </div>
           </div>
           
           <div className="text-sm text-gray-600">
             <span className="font-medium">Version:</span> 1.0.0 | 
-            <span className="font-medium ml-2">Status:</span> Production Ready
+            <span className="font-medium ml-2">Status:</span> {systemHealth?.summary?.availability_percent ? `${systemHealth.summary.availability_percent.toFixed(1)}% Availability` : 'Monitoring'}
           </div>
         </div>
 
@@ -108,6 +158,27 @@ function App() {
           {activeTab === 'overview' && (
             <div className="animate-fadeIn">
               <EvolutionProgressTracker />
+            </div>
+          )}
+
+          {activeTab === 'multifidelity' && (
+            <div className="animate-fadeIn">
+              <MultiFidelityPipeline />
+            </div>
+          )}
+
+          {activeTab === 'operations' && (
+            <div className="space-y-6 animate-fadeIn">
+              <SystemHealthDashboard />
+              <JobOrchestrationDashboard />
+              <WorkflowVisualizer />
+              <AgentActivityMonitor />
+            </div>
+          )}
+
+          {activeTab === 'vlm_nodes' && (
+            <div className="animate-fadeIn">
+              <VLMVisualization />
             </div>
           )}
 

@@ -4,10 +4,11 @@
  * Target: 1000x faster than OpenFOAM, <2% error
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { Network, Zap, TrendingDown, Clock, CheckCircle } from 'lucide-react';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Network, Zap, Clock, CheckCircle } from './lucideShim';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BACKEND_API_BASE } from '../config/endpoints';
 
 const GNNRANSVisualizer = () => {
   const [solveResult, setSolveResult] = useState(null);
@@ -18,13 +19,11 @@ const GNNRANSVisualizer = () => {
 
   const [meshSize, setMeshSize] = useState(5000);
 
-  useEffect(() => {
-    loadMeshGraph();
-  }, [meshSize]);
-
-  const loadMeshGraph = async () => {
+  const loadMeshGraph = useCallback(async () => {
     try {
-      const response = await axios.get(`http://localhost:8004/api/ml/gnn-rans/mesh-graph?num_nodes=${meshSize}`);
+      const response = await axios.get(`${BACKEND_API_BASE}/api/ml/gnn-rans/mesh-graph`, {
+        params: { num_nodes: meshSize },
+      });
       setMeshGraph(response.data);
     } catch (error) {
       // Mock data
@@ -35,7 +34,11 @@ const GNNRANSVisualizer = () => {
         edge_features: 4
       });
     }
-  };
+  }, [meshSize]);
+
+  useEffect(() => {
+    loadMeshGraph();
+  }, [loadMeshGraph]);
 
   const runSolve = async () => {
     setIsLoading(true);
@@ -54,7 +57,7 @@ const GNNRANSVisualizer = () => {
         Math.floor(Math.random() * meshSize)
       ]);
 
-      const response = await axios.post('http://localhost:8004/api/ml/gnn-rans/solve', {
+      const response = await axios.post(`${BACKEND_API_BASE}/api/ml/gnn-rans/solve`, {
         vertices,
         cells,
         boundary_conditions: {
@@ -82,7 +85,7 @@ const GNNRANSVisualizer = () => {
   const runComparison = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.post('http://localhost:8004/api/ml/gnn-rans/compare-openfoam', {
+      const response = await axios.post(`${BACKEND_API_BASE}/api/ml/gnn-rans/compare-openfoam`, {
         vertices: [],
         cells: [],
         boundary_conditions: {},
@@ -112,7 +115,9 @@ const GNNRANSVisualizer = () => {
   const runBenchmark = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get('http://localhost:8004/api/ml/gnn-rans/benchmark?mesh_sizes=1000,5000,10000,50000');
+      const response = await axios.get(`${BACKEND_API_BASE}/api/ml/gnn-rans/benchmark`, {
+        params: { mesh_sizes: '1000,5000,10000,50000' },
+      });
       setBenchmarkResults(response.data.results);
     } catch (error) {
       // Mock benchmark

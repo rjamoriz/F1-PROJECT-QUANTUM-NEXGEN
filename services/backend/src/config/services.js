@@ -11,6 +11,9 @@ module.exports = {
       vlmSolve: '/vlm/solve',
       vlmSweep: '/vlm/sweep',
       vlmValidate: '/vlm/validate',
+      flowField: '/api/v1/flow-field',
+      panelSolve: '/api/v1/panel-solve',
+      vlmBatchSimulate: '/api/vlm/batch-simulate',
       health: '/health'
     },
     timeout: 30000 // 30 seconds
@@ -22,7 +25,14 @@ module.exports = {
     endpoints: {
       predict: '/predict',
       predictBatch: '/predict/batch',
+      predictForces: '/api/v1/predict-forces',
+      gnnMeshGraph: '/api/ml/gnn-rans/mesh-graph',
+      gnnSolve: '/api/ml/gnn-rans/solve',
+      gnnCompareOpenfoam: '/api/ml/gnn-rans/compare-openfoam',
+      gnnBenchmark: '/api/ml/gnn-rans/benchmark',
       models: '/models',
+      stats: '/stats',
+      clearCache: '/cache/clear',
       health: '/health'
     },
     timeout: 10000 // 10 seconds

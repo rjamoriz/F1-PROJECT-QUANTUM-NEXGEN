@@ -6,8 +6,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
-import * as THREE from 'three';
 import axios from 'axios';
+import { BACKEND_API_BASE } from '../config/endpoints';
 
 const AnimatedWing = ({ modeShape, amplitude, frequency, isAnimating }) => {
   const meshRef = useRef();
@@ -63,7 +63,7 @@ const ModeShapeViewer = () => {
 
   const loadModes = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/api/aeroelastic/modes');
+      const response = await axios.get(`${BACKEND_API_BASE}/api/aeroelastic/modes`);
       setModes(response.data.modes);
       if (response.data.modes.length > 0) {
         setModeData(response.data.modes[0]);

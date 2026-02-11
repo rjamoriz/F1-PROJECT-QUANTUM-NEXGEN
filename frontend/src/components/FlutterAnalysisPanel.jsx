@@ -3,32 +3,17 @@
  * Displays V-g diagram, flutter margin, and modal damping analysis
  */
 
-import React, { useState, useEffect } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart, ReferenceLine } from 'recharts';
+import React, { useState, useEffect, useCallback } from 'react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
 import axios from 'axios';
+import { BACKEND_API_BASE } from '../config/endpoints';
 
 const FlutterAnalysisPanel = () => {
   const [flutterData, setFlutterData] = useState(null);
   const [vgData, setVgData] = useState([]);
-  const [selectedMode, setSelectedMode] = useState(0);
   const [configuration, setConfiguration] = useState('baseline');
 
-  useEffect(() => {
-    loadFlutterAnalysis();
-  }, [configuration]);
-
-  const loadFlutterAnalysis = async () => {
-    try {
-      const response = await axios.get(`http://localhost:3001/api/aeroelastic/flutter-analysis?config=${configuration}`);
-      setFlutterData(response.data);
-      setVgData(response.data.vg_diagram);
-    } catch (error) {
-      // Use default data if API not available
-      generateDefaultData();
-    }
-  };
-
-  const generateDefaultData = () => {
+  const generateDefaultData = useCallback(() => {
     // Generate V-g diagram data
     const velocities = [];
     for (let v = 100; v <= 350; v += 10) {
@@ -60,7 +45,24 @@ const FlutterAnalysisPanel = () => {
         { id: 3, name: '2nd Bending', frequency: 58.1, damping: 0.022 }
       ]
     });
-  };
+  }, []);
+
+  const loadFlutterAnalysis = useCallback(async () => {
+    try {
+      const response = await axios.get(`${BACKEND_API_BASE}/api/aeroelastic/flutter-analysis`, {
+        params: { config: configuration },
+      });
+      setFlutterData(response.data);
+      setVgData(response.data.vg_diagram);
+    } catch (error) {
+      // Use default data if API not available
+      generateDefaultData();
+    }
+  }, [configuration, generateDefaultData]);
+
+  useEffect(() => {
+    loadFlutterAnalysis();
+  }, [loadFlutterAnalysis]);
 
   const getStatusColor = (margin) => {
     if (margin >= 1.5) return 'text-green-600';
