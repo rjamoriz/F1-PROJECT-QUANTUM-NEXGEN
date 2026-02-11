@@ -85,6 +85,7 @@ data/cfd-results/*
 !data/cfd-results/.gitkeep
 data/training-datasets/*
 !data/training-datasets/.gitkeep
+data_generation/output/*.parquet
 *.h5
 *.hdf5
 *.onnx
