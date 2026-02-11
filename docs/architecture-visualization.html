@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F1 Quantum-Aero Architecture - Interactive Visualization</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+
+        #header {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00d4ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        #controls {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            margin: 10px 20px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        button.active {
+            background: linear-gradient(135deg, #00ff88, #00d4ff);
+        }
+
+        #visualization {
+            width: 100%;
+            height: calc(100vh - 200px);
+            background: rgba(255, 255, 255, 0.9);
+            margin: 0;
+        }
+
+        .node {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .node:hover {
+            filter: brightness(1.2);
+        }
+
+        .node-circle {
+            stroke: white;
+            stroke-width: 3px;
+            filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.3));
+        }
+
+        .node-text {
+            font-size: 12px;
+            font-weight: bold;
+            pointer-events: none;
+            text-anchor: middle;
+            fill: #333;
+        }
+
+        .node-subtext {
+            font-size: 10px;
+            pointer-events: none;
+            text-anchor: middle;
+            fill: #666;
+        }
+
+        .link {
+            stroke: #999;
+            stroke-opacity: 0.6;
+            stroke-width: 2px;
+            fill: none;
+        }
+
+        .link-active {
+            stroke: #00ff88;
+            stroke-width: 4px;
+            stroke-opacity: 1;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { stroke-opacity: 0.6; }
+            50% { stroke-opacity: 1; }
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            max-width: 300px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+            font-size: 12px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+            border: 2px solid white;
+        }
+
+        .stats {
+            position: absolute;
+            top: 140px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            font-size: 12px;
+        }
+
+        .stat-item {
+            margin: 8px 0;
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .stat-label {
+            font-weight: bold;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <h1>🏎️⚛️ F1 Quantum-Aero Architecture</h1>
+        <p>Interactive System Visualization - AI + Quantum Computing + Real-Time CFD</p>
+    </div>
+
+    <div id="controls">
+        <button onclick="setView('full')" class="active" id="btn-full">Full Architecture</button>
+        <button onclick="setView('ai')">AI Services</button>
+        <button onclick="setView('quantum')">Quantum Layer</button>
+        <button onclick="setView('agents')">Multi-Agent System</button>
+        <button onclick="animateDataFlow()">🌊 Animate Data Flow</button>
+        <button onclick="resetView()">🔄 Reset</button>
+    </div>
+
+    <svg id="visualization"></svg>
+
+    <div class="tooltip" id="tooltip"></div>
+
+    <div class="stats">
+        <h3 style="margin-bottom: 10px; color: #667eea;">📊 System Stats</h3>
+        <div class="stat-item">
+            <span class="stat-label">Services:</span>
+            <span>8 Active</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Agents:</span>
+            <span>6 Autonomous</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Components:</span>
+            <span>30+ React</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">CFD Speed:</span>
+            <span>&lt;50ms</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">RANS Speedup:</span>
+            <span>1000x</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Quantum Qubits:</span>
+            <span>50-100</span>
+        </div>
+    </div>
+
+    <div class="legend">
+        <h3 style="margin-bottom: 10px; font-size: 14px;">Layer Legend</h3>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #fce4ec;"></div>
+            <span>Frontend (React/D3.js)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #e1f5ff;"></div>
+            <span>AI/ML Services</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #fff3e0;"></div>
+            <span>Quantum Computing</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #f3e5f5;"></div>
+            <span>Physics Engine</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #e8f5e9;"></div>
+            <span>Multi-Agent System</span>
+        </div>
+    </div>
+
+    <script>
+        const width = window.innerWidth;
+        const height = window.innerHeight - 200;
+
+        const svg = d3.select("#visualization")
+            .attr("width", width)
+            .attr("height", height);
+
+        const g = svg.append("g");
+
+        // Zoom behavior
+        const zoom = d3.zoom()
+            .scaleExtent([0.5, 3])
+            .on("zoom", (event) => {
+                g.attr("transform", event.transform);
+            });
+
+        svg.call(zoom);
+
+        // Architecture data structure
+        const nodes = [
+            // Frontend
+            { id: "ui", label: "React\nDashboard", layer: "frontend", x: width/2, y: 50, radius: 40, description: "30+ React components with real-time updates" },
+            { id: "viz", label: "3D Viz\nThree.js", layer: "frontend", x: width/2 - 120, y: 50, radius: 35, description: "Interactive 3D flow field visualization" },
+            
+            // Gateway
+            { id: "gateway", label: "API Gateway\n:8000", layer: "gateway", x: width/2, y: 180, radius: 50, description: "FastAPI routing and orchestration" },
+            
+            // AI Services
+            { id: "aerotransformer", label: "AeroTransformer\n:8003", layer: "ai", x: width/2 - 200, y: 320, radius: 45, description: "Vision Transformer + U-Net\n<50ms CFD inference" },
+            { id: "gnn", label: "GNN-RANS\n:8004", layer: "ai", x: width/2 - 50, y: 320, radius: 45, description: "Graph Neural Networks\n1000x faster than OpenFOAM" },
+            { id: "aerogan", label: "AeroGAN", layer: "ai", x: width/2 + 100, y: 320, radius: 35, description: "Generative adversarial network\nfor design synthesis" },
+            
+            // Quantum
+            { id: "vqe", label: "VQE\n:8005", layer: "quantum", x: width/2 + 250, y: 320, radius: 42, description: "Variational Quantum Eigensolver\n50-100 qubits" },
+            { id: "dwave", label: "D-Wave\n:8006", layer: "quantum", x: width/2 + 380, y: 320, radius: 42, description: "Quantum Annealing\n5000+ variables" },
+            
+            // Physics
+            { id: "vlm", label: "VLM", layer: "physics", x: width/2 - 350, y: 320, radius: 35, description: "Vortex Lattice Method\nfast lift/drag estimation" },
+            { id: "panel", label: "Panel\nMethod", layer: "physics", x: width/2 - 470, y: 320, radius: 35, description: "Boundary condition solver" },
+            
+            // Agents
+            { id: "master", label: "Master\nOrchestrator", layer: "agents", x: width/2, y: 480, radius: 40, description: "Coordinates all agent activities" },
+            { id: "router", label: "Intent\nRouter", layer: "agents", x: width/2 - 150, y: 550, radius: 35, description: "Routes requests to specialized agents" },
+            { id: "ml_agent", label: "ML Agent", layer: "agents", x: width/2 - 280, y: 630, radius: 32, description: "Manages ML model inference" },
+            { id: "quantum_agent", label: "Quantum\nAgent", layer: "agents", x: width/2 - 140, y: 630, radius: 32, description: "Handles quantum optimization" },
+            { id: "vis_agent", label: "Viz Agent", layer: "agents", x: width/2, y: 630, radius: 32, description: "Generates visualization data" },
+            { id: "analysis_agent", label: "Analysis\nAgent", layer: "agents", x: width/2 + 140, y: 630, radius: 32, description: "Performs multi-fidelity analysis" },
+            
+            // Data
+            { id: "data", label: "Data\nGenerator", layer: "data", x: width/2 - 200, y: 480, radius: 35, description: "Synthetic CFD dataset generation" },
+            { id: "db", label: "Database\nRedis/PG", layer: "data", x: width/2 + 200, y: 480, radius: 35, description: "PostgreSQL + Redis cache" },
+        ];
+
+        const links = [
+            // Frontend to Gateway
+            { source: "ui", target: "gateway" },
+            { source: "viz", target: "gateway" },
+            
+            // Gateway to Services
+            { source: "gateway", target: "aerotransformer" },
+            { source: "gateway", target: "gnn" },
+            { source: "gateway", target: "aerogan" },
+            { source: "gateway", target: "vqe" },
+            { source: "gateway", target: "dwave" },
+            { source: "gateway", target: "vlm" },
+            { source: "gateway", target: "panel" },
+            
+            // Services to Agents
+            { source: "aerotransformer", target: "ml_agent" },
+            { source: "gnn", target: "ml_agent" },
+            { source: "vqe", target: "quantum_agent" },
+            { source: "dwave", target: "quantum_agent" },
+            
+            // Agent hierarchy
+            { source: "gateway", target: "master" },
+            { source: "master", target: "router" },
+            { source: "router", target: "ml_agent" },
+            { source: "router", target: "quantum_agent" },
+            { source: "router", target: "vis_agent" },
+            { source: "router", target: "analysis_agent" },
+            
+            // Data connections
+            { source: "data", target: "aerotransformer", type: "dashed" },
+            { source: "data", target: "gnn", type: "dashed" },
+            { source: "ml_agent", target: "db" },
+            { source: "quantum_agent", target: "db" },
+            { source: "vis_agent", target: "db" },
+        ];
+
+        const layerColors = {
+            frontend: "#fce4ec",
+            gateway: "#c5cae9",
+            ai: "#e1f5ff",
+            quantum: "#fff3e0",
+            physics: "#f3e5f5",
+            agents: "#e8f5e9",
+            data: "#f1f8e9"
+        };
+
+        // Draw links
+        const linkElements = g.selectAll(".link")
+            .data(links)
+            .enter()
+            .append("path")
+            .attr("class", "link")
+            .attr("stroke-dasharray", d => d.type === "dashed" ? "5,5" : "0")
+            .attr("d", d => {
+                const source = nodes.find(n => n.id === d.source);
+                const target = nodes.find(n => n.id === d.target);
+                return `M ${source.x} ${source.y} L ${target.x} ${target.y}`;
+            });
+
+        // Draw nodes
+        const nodeGroups = g.selectAll(".node")
+            .data(nodes)
+            .enter()
+            .append("g")
+            .attr("class", "node")
+            .attr("transform", d => `translate(${d.x}, ${d.y})`)
+            .on("mouseover", showTooltip)
+            .on("mouseout", hideTooltip)
+            .on("click", highlightConnections);
+
+        nodeGroups.append("circle")
+            .attr("class", "node-circle")
+            .attr("r", d => d.radius)
+            .attr("fill", d => layerColors[d.layer]);
+
+        nodeGroups.append("text")
+            .attr("class", "node-text")
+            .attr("dy", 5)
+            .selectAll("tspan")
+            .data(d => d.label.split('\n'))
+            .enter()
+            .append("tspan")
+            .attr("x", 0)
+            .attr("dy", (d, i) => i === 0 ? 0 : 14)
+            .text(d => d);
+
+        // Tooltip functions
+        function showTooltip(event, d) {
+            const tooltip = d3.select("#tooltip");
+            tooltip.style("opacity", 1)
+                .html(`<strong>${d.label.replace('\n', ' ')}</strong><br>${d.description}`)
+                .style("left", (event.pageX + 10) + "px")
+                .style("top", (event.pageY - 10) + "px");
+        }
+
+        function hideTooltip() {
+            d3.select("#tooltip").style("opacity", 0);
+        }
+
+        function highlightConnections(event, clickedNode) {
+            // Reset all
+            linkElements.attr("class", "link");
+            
+            // Highlight connected
+            linkElements.filter(d => d.source === clickedNode.id || d.target === clickedNode.id)
+                .attr("class", "link link-active");
+        }
+
+        function setView(view) {
+            // Update button states
+            d3.selectAll("#controls button").classed("active", false);
+            d3.select(`#btn-${view}`).classed("active", true);
+
+            let visibleNodes = [];
+            
+            switch(view) {
+                case 'ai':
+                    visibleNodes = nodes.filter(n => ['frontend', 'gateway', 'ai', 'data'].includes(n.layer));
+                    break;
+                case 'quantum':
+                    visibleNodes = nodes.filter(n => ['frontend', 'gateway', 'quantum', 'agents'].includes(n.layer));
+                    break;
+                case 'agents':
+                    visibleNodes = nodes.filter(n => ['gateway', 'agents', 'data'].includes(n.layer));
+                    break;
+                default:
+                    visibleNodes = nodes;
+            }
+
+            const visibleIds = new Set(visibleNodes.map(n => n.id));
+            
+            nodeGroups.transition()
+                .duration(500)
+                .style("opacity", d => visibleIds.has(d.id) ? 1 : 0.1);
+            
+            linkElements.transition()
+                .duration(500)
+                .style("opacity", d => visibleIds.has(d.source) && visibleIds.has(d.target) ? 0.6 : 0.1);
+        }
+
+        function animateDataFlow() {
+            const dataPath = ["ui", "gateway", "aerotransformer", "ml_agent", "router", "master"];
+            
+            dataPath.forEach((nodeId, i) => {
+                setTimeout(() => {
+                    nodeGroups.filter(d => d.id === nodeId)
+                        .select("circle")
+                        .transition()
+                        .duration(300)
+                        .attr("r", d => d.radius * 1.3)
+                        .transition()
+                        .duration(300)
+                        .attr("r", d => d.radius);
+                }, i * 400);
+            });
+
+            // Animate links sequentially
+            for (let i = 0; i < dataPath.length - 1; i++) {
+                setTimeout(() => {
+                    linkElements.filter(d => d.source === dataPath[i] && d.target === dataPath[i + 1])
+                        .classed("link-active", true)
+                        .transition()
+                        .duration(800)
+                        .on("end", function() {
+                            d3.select(this).classed("link-active", false);
+                        });
+                }, i * 400);
+            }
+        }
+
+        function resetView() {
+            setView('full');
+            linkElements.attr("class", "link");
+            svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
+        }
+
+        // Initialize
+        setView('full');
+    </script>
+</body>
+</html>
