@@ -53,5 +53,101 @@
     "dwave_sa": true,
     "cudaq_gpu": false,
     "scipy_fallback": true
-  }
+  },
+  "advanced_methods": {
+    "cvar_qaoa": {
+      "alpha_values": [
+        0.1,
+        0.25,
+        0.5,
+        0.75,
+        1.0
+      ],
+      "best_energy": 0.11849802311797605,
+      "best_alpha": 0.1
+    },
+    "ws_qaoa": {
+      "best_energy": 0.11753935570610846,
+      "best_config": {
+        "p": 1,
+        "epsilon": 0.1
+      },
+      "speedup_vs_standard": 36.77256516127205
+    },
+    "rqaoa": {
+      "energy": 0.11753935570610846,
+      "variables_fixed": 8,
+      "matches_optimal": true
+    },
+    "pareto": {
+      "circuits_analyzed": 7,
+      "pareto_sweep_points": 40,
+      "cd_range": [
+        0.7488367346938776,
+        0.847857142857143
+      ],
+      "cl_range": [
+        1.868,
+        2.7780000000000005
+      ]
+    }
+  },
+  "grand_comparison": [
+    {
+      "Method": "Brute-Force (exact)",
+      "Category": "Classical",
+      "Energy": 0.11753935570610846,
+      "Time_s": 11.871748069002933,
+      "Matches_Optimal": true,
+      "Approx_Ratio": 1.0
+    },
+    {
+      "Method": "D-Wave SA",
+      "Category": "D-Wave",
+      "Energy": 0.11797053206143643,
+      "Time_s": 0.19996367499697953,
+      "Matches_Optimal": true,
+      "Approx_Ratio": 0.9963450503461032
+    },
+    {
+      "Method": "D-Wave Tabu",
+      "Category": "D-Wave",
+      "Energy": 0.11797053206143654,
+      "Time_s": 21.08620876999339,
+      "Matches_Optimal": true,
+      "Approx_Ratio": 0.9963450503461023
+    },
+    {
+      "Method": "QAOA p=3",
+      "Category": "QAOA",
+      "Energy": 0.11828570945254524,
+      "Time_s": 46.447684205995756,
+      "Matches_Optimal": false,
+      "Approx_Ratio": 0.9936902458471857
+    },
+    {
+      "Method": "CVaR-QAOA \u03b1=0.10",
+      "Category": "Advanced QAOA",
+      "Energy": 0.11849802311797605,
+      "Time_s": 41.51255197900173,
+      "Matches_Optimal": false,
+      "Approx_Ratio": 0.9919098446822767
+    },
+    {
+      "Method": "WS-QAOA p=1 \u03b5=0.10",
+      "Category": "Advanced QAOA",
+      "Energy": 0.11753935570610846,
+      "Time_s": 1.2983391730085714,
+      "Matches_Optimal": true,
+      "Approx_Ratio": 1.0
+    },
+    {
+      "Method": "RQAOA (8-fix)",
+      "Category": "Advanced QAOA",
+      "Energy": 0.11753935570610846,
+      "Time_s": 0.0014528910105582327,
+      "Matches_Optimal": true,
+      "Approx_Ratio": 1.0
+    }
+  ]
 }
