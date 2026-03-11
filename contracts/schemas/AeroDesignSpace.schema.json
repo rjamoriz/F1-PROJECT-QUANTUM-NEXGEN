@@ -1,0 +1,120 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "AeroDesignSpace.schema.json",
+  "title": "Aerodynamic Design Space",
+  "description": "Definition of discrete/continuous design variables for aero optimization",
+  "type": "object",
+  "required": ["design_type", "variables"],
+  "properties": {
+    "design_type": {
+      "type": "string",
+      "description": "Type of aerodynamic component being optimized",
+      "enum": [
+        "front_wing_discrete_v1",
+        "rear_wing_discrete_v1",
+        "floor_edge_continuous",
+        "diffuser_discrete",
+        "custom"
+      ],
+      "examples": ["front_wing_discrete_v1"]
+    },
+    "variables": {
+      "type": "array",
+      "description": "List of design variables",
+      "minItems": 1,
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "required": ["name", "type", "domain"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Variable name (must be unique within design space)",
+            "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$",
+            "examples": ["main_profile", "flap_angle_bin", "gurney_flap"]
+          },
+          "type": {
+            "type": "string",
+            "description": "Variable type",
+            "enum": ["binary", "categorical", "integer", "continuous"]
+          },
+          "domain": {
+            "description": "Valid values or range for variable",
+            "oneOf": [
+              {
+                "type": "object",
+                "description": "Continuous or integer range",
+                "required": ["min", "max"],
+                "properties": {
+                  "min": {"type": "number"},
+                  "max": {"type": "number"}
+                }
+              },
+              {
+                "type": "array",
+                "description": "Categorical choices",
+                "minItems": 2,
+                "items": {"type": "string"},
+                "examples": [
+                  ["NACA4412", "NACA6412", "S1223"],
+                  ["0deg", "10deg", "20deg"]
+                ]
+              }
+            ]
+          },
+          "one_hot_group": {
+            "type": "string",
+            "description": "Group ID for one-hot encoding (choose exactly 1 from group)",
+            "examples": ["profile_choice", "flap_angle"]
+          },
+          "default": {
+            "description": "Default value for variable",
+            "oneOf": [
+              {"type": "number"},
+              {"type": "string"},
+              {"type": "integer"}
+            ]
+          },
+          "description": {
+            "type": "string",
+            "description": "Human-readable description of variable",
+            "examples": ["Main element airfoil profile selection"]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "constraints": {
+      "type": "array",
+      "description": "Design space constraints (beyond variable domains)",
+      "items": {
+        "type": "object",
+        "required": ["type", "expression"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["linear_inequality", "nonlinear", "logical"]
+          },
+          "expression": {
+            "type": "string",
+            "description": "Constraint expression",
+            "examples": [
+              "flap_angle <= main_angle + 10",
+              "gurney_flap == 1 OR endplate_louvers > 0"
+            ]
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional metadata about design space",
+      "properties": {
+        "author": {"type": "string"},
+        "created_at": {"type": "string", "format": "date-time"},
+        "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"}
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -142,3 +142,17 @@ Icon?
 *.exe
 *.out
 *.app
+
+# ================================================================
+# Environment files with secrets (keep .example variants tracked)
+# ================================================================
+.env
+.env.desktop
+.env.production
+.env.staging
+.env.local
+
+# ================================================================
+# Load test results (ephemeral)
+# ================================================================
+load_test_local_*.json

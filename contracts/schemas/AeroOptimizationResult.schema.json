@@ -1,0 +1,201 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "AeroOptimizationResult.schema.json",
+  "title": "Aerodynamic Optimization Result",
+  "description": "Result from quantum-ready aero optimization loop",
+  "type": "object",
+  "required": ["success", "runId", "result", "metadata"],
+  "properties": {
+    "success": {
+      "type": "boolean",
+      "description": "Whether optimization completed successfully"
+    },
+    "runId": {
+      "type": "string",
+      "description": "Unique run identifier (UUID)",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "result": {
+      "type": "object",
+      "description": "Optimal design and performance metrics",
+      "required": ["design", "performance"],
+      "properties": {
+        "design": {
+          "type": "object",
+          "description": "Optimal design variable values",
+          "additionalProperties": true
+        },
+        "performance": {
+          "type": "object",
+          "description": "Aerodynamic performance metrics",
+          "required": ["cl", "cd"],
+          "properties": {
+            "cl": {
+              "type": "number",
+              "description": "Lift coefficient"
+            },
+            "cd": {
+              "type": "number",
+              "description": "Drag coefficient"
+            },
+            "cm": {
+              "type": "number",
+              "description": "Moment coefficient"
+            },
+            "ld_ratio": {
+              "type": "number",
+              "description": "Lift-to-drag ratio"
+            },
+            "balance": {
+              "type": "number",
+              "description": "Front/rear balance metric",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        },
+        "validation": {
+          "type": "object",
+          "description": "VLM validation results",
+          "properties": {
+            "ml_prediction": {
+              "type": "object",
+              "properties": {
+                "cl": {"type": "number"},
+                "cd": {"type": "number"},
+                "cm": {"type": "number"}
+              }
+            },
+            "vlm_truth": {
+              "type": "object",
+              "properties": {
+                "cl": {"type": "number"},
+                "cd": {"type": "number"},
+                "cm": {"type": "number"}
+              }
+            },
+            "error": {
+              "type": "object",
+              "description": "Percentage errors",
+              "properties": {
+                "cl_error_pct": {"type": "number"},
+                "cd_error_pct": {"type": "number"}
+              }
+            },
+            "status": {
+              "type": "string",
+              "enum": ["pass", "fail", "skipped"]
+            }
+          }
+        },
+        "confidence": {
+          "type": "number",
+          "description": "Prediction confidence score [0-1]",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Run metadata and statistics",
+      "required": ["compute_time_ms"],
+      "properties": {
+        "n_candidates_generated": {
+          "type": "integer",
+          "description": "Total candidates generated from design space"
+        },
+        "n_ml_evaluated": {
+          "type": "integer",
+          "description": "Candidates evaluated with ML surrogate"
+        },
+        "n_vlm_validated": {
+          "type": "integer",
+          "description": "Top-k candidates validated with VLM"
+        },
+        "quantum_method": {
+          "type": "string",
+          "enum": ["qaoa", "classical", "hybrid"],
+          "description": "Quantum optimization method used"
+        },
+        "qaoa_iterations": {
+          "type": "integer",
+          "description": "Classical optimizer iterations for QAOA"
+        },
+        "compute_time_ms": {
+          "type": "integer",
+          "description": "Total computation time [milliseconds]",
+          "minimum": 0
+        },
+        "timing_breakdown": {
+          "type": "object",
+          "description": "Time spent in each stage [ms]",
+          "properties": {
+            "candidate_generation_ms": {"type": "integer"},
+            "ml_prediction_ms": {"type": "integer"},
+            "qubo_formulation_ms": {"type": "integer"},
+            "quantum_solve_ms": {"type": "integer"},
+            "vlm_validation_ms": {"type": "integer"}
+          }
+        },
+        "cached": {
+          "type": "boolean",
+          "description": "Whether result was retrieved from cache"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Run timestamp (ISO 8601)"
+        }
+      }
+    },
+    "trace": {
+      "type": "object",
+      "description": "Detailed execution trace (optional, for debugging)",
+      "properties": {
+        "qubo_matrix": {
+          "type": "array",
+          "description": "QUBO matrix (if include_trace=true)"
+        },
+        "qaoa_parameters": {
+          "type": "object",
+          "description": "Final QAOA circuit parameters"
+        },
+        "candidate_scores": {
+          "type": "array",
+          "description": "All candidate evaluations",
+          "items": {
+            "type": "object",
+            "properties": {
+              "candidate_id": {"type": "string"},
+              "score": {"type": "number"},
+              "ml_prediction": {"type": "object"}
+            }
+          }
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "description": "Non-fatal warnings during optimization",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": {"type": "string"},
+          "message": {"type": "string"},
+          "timestamp": {"type": "string", "format": "date-time"}
+        }
+      }
+    },
+    "error": {
+      "type": "object",
+      "description": "Error details (if success=false)",
+      "properties": {
+        "code": {"type": "string"},
+        "message": {"type": "string"},
+        "details": {"type": "object"}
+      }
+    }
+  },
+  "additionalProperties": false
+}

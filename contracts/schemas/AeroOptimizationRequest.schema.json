@@ -1,0 +1,215 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "AeroOptimizationRequest.schema.json",
+  "title": "Aerodynamic Optimization Request",
+  "description": "Request payload for quantum-ready aero optimization loop",
+  "type": "object",
+  "required": ["design_space", "flow", "objective"],
+  "properties": {
+    "design_space": {
+      "$ref": "AeroDesignSpace.schema.json",
+      "description": "Design space definition with variables and constraints"
+    },
+    "flow": {
+      "$ref": "FlowConditions.schema.json",
+      "description": "Flow conditions for evaluation"
+    },
+    "objective": {
+      "type": "object",
+      "description": "Multi-objective optimization specification",
+      "required": ["weights"],
+      "properties": {
+        "weights": {
+          "type": "object",
+          "description": "Objective function weights (must sum to 1.0 or be normalized)",
+          "required": ["downforce", "drag"],
+          "properties": {
+            "downforce": {
+              "type": "number",
+              "description": "Weight for downforce maximization (negative Cl)",
+              "minimum": 0,
+              "maximum": 1,
+              "examples": [0.7, 0.5]
+            },
+            "drag": {
+              "type": "number",
+              "description": "Weight for drag minimization (Cd)",
+              "minimum": 0,
+              "maximum": 1,
+              "examples": [0.3, 0.4]
+            },
+            "balance": {
+              "type": "number",
+              "description": "Weight for front/rear aerodynamic balance",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0,
+              "examples": [0.1]
+            },
+            "efficiency": {
+              "type": "number",
+              "description": "Weight for L/D ratio (Cl/Cd)",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0
+            }
+          },
+          "additionalProperties": false
+        },
+        "constraints": {
+          "type": "array",
+          "description": "Hard constraints on aerodynamic performance",
+          "items": {
+            "type": "object",
+            "required": ["type", "value"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "cl_min",
+                  "cl_max",
+                  "cd_max",
+                  "ld_min",
+                  "balance_range",
+                  "pitch_moment_range"
+                ]
+              },
+              "value": {
+                "type": "number",
+                "description": "Constraint threshold value"
+              },
+              "range": {
+                "type": "object",
+                "description": "Range constraint (for balance, etc.)",
+                "properties": {
+                  "min": {"type": "number"},
+                  "max": {"type": "number"}
+                }
+              }
+            }
+          }
+        },
+        "method": {
+          "type": "string",
+          "description": "Multi-objective optimization method",
+          "enum": ["weighted_sum", "pareto_frontier", "epsilon_constraint"],
+          "default": "weighted_sum"
+        }
+      },
+      "additionalProperties": false
+    },
+    "quantum": {
+      "type": "object",
+      "description": "Quantum optimizer configuration",
+      "properties": {
+        "p_layers": {
+          "type": "integer",
+          "description": "QAOA circuit depth (number of layers)",
+          "minimum": 1,
+          "maximum": 10,
+          "default": 3,
+          "examples": [2, 3, 5]
+        },
+        "shots": {
+          "type": "integer",
+          "description": "Number of quantum circuit shots",
+          "minimum": 100,
+          "maximum": 100000,
+          "default": 1024,
+          "examples": [512, 1024, 4096]
+        },
+        "method": {
+          "type": "string",
+          "description": "Quantum optimization method (auto-select based on problem size)",
+          "enum": ["auto", "qaoa", "classical"],
+          "default": "auto"
+        },
+        "optimizer": {
+          "type": "string",
+          "description": "Classical optimizer for QAOA parameter optimization",
+          "enum": ["COBYLA", "SPSA", "ADAM"],
+          "default": "COBYLA"
+        },
+        "max_iterations": {
+          "type": "integer",
+          "description": "Maximum classical optimizer iterations",
+          "minimum": 10,
+          "maximum": 500,
+          "default": 100
+        },
+        "seed": {
+          "type": "integer",
+          "description": "Random seed for reproducibility",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "validation": {
+      "type": "object",
+      "description": "Validation configuration",
+      "properties": {
+        "top_k": {
+          "type": "integer",
+          "description": "Number of top candidates to validate with VLM",
+          "minimum": 1,
+          "maximum": 10,
+          "default": 3
+        },
+        "require_vlm": {
+          "type": "boolean",
+          "description": "Require VLM validation (false = ML-only)",
+          "default": true
+        },
+        "vlm_tolerance": {
+          "type": "number",
+          "description": "Maximum acceptable ML-VLM error tolerance",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.15,
+          "examples": [0.1, 0.15, 0.2]
+        }
+      },
+      "additionalProperties": false
+    },
+    "sampling": {
+      "type": "object",
+      "description": "Design space sampling configuration",
+      "properties": {
+        "n_candidates": {
+          "type": "integer",
+          "description": "Number of initial candidates to generate",
+          "minimum": 10,
+          "maximum": 1000,
+          "default": 100
+        },
+        "method": {
+          "type": "string",
+          "enum": ["random", "lhs", "sobol", "grid"],
+          "default": "lhs",
+          "description": "Sampling method (LHS = Latin Hypercube Sampling)"
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Request metadata (tracking, tags, etc.)",
+      "properties": {
+        "request_id": {
+          "type": "string",
+          "description": "Client-provided request ID"
+        },
+        "tags": {
+          "type": "array",
+          "items": {"type": "string"},
+          "examples": [["race_setup_monaco", "front_wing_optimization"]]
+        },
+        "user_id": {
+          "type": "string",
+          "description": "User/session identifier"
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

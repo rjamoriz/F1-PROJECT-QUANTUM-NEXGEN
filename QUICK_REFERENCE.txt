@@ -1,0 +1,97 @@
+╔═══════════════════════════════════════════════════════════════════════╗
+║           🏎️  F1 QUANTUM NEXGEN - QUICK REFERENCE CARD               ║
+╚═══════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ 🚀 DEPLOYMENT                                                        │
+├─────────────────────────────────────────────────────────────────────┤
+│ Deploy production:    ./deploy-production.sh                        │
+│ Stop containers:      ./stop-production.sh                          │
+│ Container manager:    ./manage-containers.sh                        │
+│ Health check:         ./health-check.sh                             │
+│ View logs:            ./view-logs.sh                                │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ 🌐 ACCESS URLS                                                       │
+├─────────────────────────────────────────────────────────────────────┤
+│ Frontend:             http://localhost:3000                         │
+│ Backend API:          http://localhost:3001                         │
+│ Backend Health:       http://localhost:3001/health                  │
+│ Physics Engine:       http://localhost:8001                         │
+│ ML Surrogate:         http://localhost:8000                         │
+│ Quantum Optimizer:    http://localhost:8002                         │
+│ NATS Monitoring:      http://localhost:8222                         │
+│ MongoDB:              mongodb://localhost:27017                     │
+│ Redis:                redis://localhost:6379                        │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ 🔧 QUICK COMMANDS                                                    │
+├─────────────────────────────────────────────────────────────────────┤
+│ Container status:                                                    │
+│   docker compose --env-file .env.production \                       │
+│     -f docker-compose.yml -f docker-compose.production.yml \        │
+│     --profile production ps                                         │
+│                                                                      │
+│ Restart all:                                                         │
+│   docker compose --env-file .env.production \                       │
+│     -f docker-compose.yml -f docker-compose.production.yml \        │
+│     --profile production restart                                    │
+│                                                                      │
+│ Rebuild service (e.g., backend):                                    │
+│   docker compose --env-file .env.production \                       │
+│     -f docker-compose.yml -f docker-compose.production.yml \        │
+│     --profile production up -d --build backend                      │
+│                                                                      │
+│ Backup MongoDB:                                                      │
+│   docker exec qaero-mongodb mongodump --archive=/data/backup.gz    │
+│   docker cp qaero-mongodb:/data/backup.gz ./backup.gz              │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ 🔐 SECURITY REMINDERS                                                │
+├─────────────────────────────────────────────────────────────────────┤
+│ ✓ Update JWT_SECRET in .env.production                             │
+│ ✓ Update REFRESH_TOKEN_PEPPER in .env.production                   │
+│ ✓ Update QUANTUM_RELIABILITY_INGEST_TOKEN                          │
+│ ✓ Use strong random values (32+ characters)                        │
+│ ✓ Never commit .env.production to version control                  │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ 📊 SERVICES OVERVIEW                                                 │
+├─────────────────────────────────────────────────────────────────────┤
+│ Frontend:          React + Nginx                                    │
+│ Backend:           Node.js + Express + WebSocket                    │
+│ Physics Engine:    Python + FastAPI + CFD                          │
+│ ML Surrogate:      Python + PyTorch + RL                            │
+│ Quantum Optimizer: Python + Qiskit + D-Wave                        │
+│ Database:          MongoDB 7                                        │
+│ Cache:             Redis 7                                          │
+│ Message Broker:    NATS                                             │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ 📚 DOCUMENTATION                                                     │
+├─────────────────────────────────────────────────────────────────────┤
+│ Docker Desktop Guide:     DOCKER_DESKTOP_GUIDE.md                   │
+│ Main README:              README.MD                                 │
+│ Deployment Guide:         DEPLOYMENT_GUIDE.md                       │
+│ Demo Presentation:        DEMO_PRESENTATION.md                      │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ ⚡ TROUBLESHOOTING                                                   │
+├─────────────────────────────────────────────────────────────────────┤
+│ Service not starting?    → ./view-logs.sh                          │
+│ Port already in use?     → lsof -i :3000 (check process)           │
+│ Database connection?     → ./health-check.sh                       │
+│ Need more resources?     → Docker Desktop → Settings → Resources   │
+│ Build failing?           → docker builder prune -a                 │
+│ Complete reset?          → manage-containers.sh → Option 7         │
+└─────────────────────────────────────────────────────────────────────┘
+
+╔═══════════════════════════════════════════════════════════════════════╗
+║  💡 TIP: Run './manage-containers.sh' for an interactive menu        ║
+╚═══════════════════════════════════════════════════════════════════════╝

@@ -1,0 +1,120 @@
+# Q-AERO Staging Environment Override
+# Usage: docker compose -f docker-compose.yml -f docker-compose.staging.yml --env-file .env.staging up -d
+#
+# Note: To scale services, first remove container_name from base compose, then use:
+# docker compose -f docker-compose.yml -f docker-compose.staging.yml --env-file .env.staging up -d --scale backend=2
+
+services:
+  backend:
+    environment:
+      - NODE_ENV=staging
+      - LOG_LEVEL=info
+      - DEBUG=false
+      - ENABLE_RATE_LIMIT=true
+      - ENABLE_OBSERVABILITY=true
+      - SLO_TARGET_AVAILABILITY=99.5
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  ml-surrogate:
+    environment:
+      - ENV=staging
+      - LOG_LEVEL=INFO
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+
+  physics-engine:
+    environment:
+      - ENV=staging
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
+
+  quantum-optimizer:
+    environment:
+      - ENV=staging
+      - QUANTUM_METHOD=auto
+      - MAX_QUBITS=12
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 2G
+        reservations:
+          cpus: '0.75'
+          memory: 1G
+
+  mongodb:
+    volumes:
+      - mongodb_staging_data:/data/db
+      - mongodb_staging_config:/data/configdb
+    command: mongod --bind_ip_all --auth
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+
+  redis:
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-staging_redis_pass}
+    volumes:
+      - redis_staging_data:/data
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  nats:
+    command: >
+      --cluster_name qaero_staging_cluster
+      --user ${NATS_USER:-staging_user}
+      --pass ${NATS_PASS:-staging_pass}
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+volumes:
+  mongodb_staging_data:
+    driver: local
+  mongodb_staging_config:
+    driver: local
+  redis_staging_data:
+    driver: local
+
+networks:
+  default:
+    name: qaero-staging-network
+    driver: bridge

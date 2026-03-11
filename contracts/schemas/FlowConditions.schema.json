@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "FlowConditions.schema.json",
+  "title": "Flow Conditions",
+  "description": "Aerodynamic flow parameters for simulation and optimization",
+  "type": "object",
+  "required": ["velocity", "alpha"],
+  "properties": {
+    "velocity": {
+      "type": "number",
+      "description": "Freestream velocity [m/s]",
+      "minimum": 0,
+      "exclusiveMinimum": true,
+      "maximum": 150,
+      "examples": [50, 80, 100]
+    },
+    "alpha": {
+      "type": "number",
+      "description": "Angle of attack [degrees]",
+      "minimum": -20,
+      "maximum": 30,
+      "examples": [0, 3.5, 5, 10]
+    },
+    "yaw": {
+      "type": "number",
+      "description": "Yaw/sideslip angle [degrees]",
+      "minimum": -15,
+      "maximum": 15,
+      "default": 0,
+      "examples": [0, 2, -3]
+    },
+    "rho": {
+      "type": "number",
+      "description": "Air density [kg/m³]",
+      "minimum": 0,
+      "exclusiveMinimum": true,
+      "default": 1.225,
+      "examples": [1.225, 1.2, 1.15]
+    },
+    "ride_height": {
+      "type": "number",
+      "description": "Ground clearance [m] - for ground effect modeling",
+      "minimum": 0,
+      "exclusiveMinimum": true,
+      "maximum": 0.5,
+      "examples": [0.05, 0.1, 0.15]
+    },
+    "pitch": {
+      "type": "number",
+      "description": "Pitch angle [degrees]",
+      "minimum": -10,
+      "maximum": 10,
+      "default": 0,
+      "examples": [0, 1.5, -2]
+    }
+  },
+  "additionalProperties": false
+}

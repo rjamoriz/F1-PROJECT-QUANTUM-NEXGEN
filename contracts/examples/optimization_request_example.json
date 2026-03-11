@@ -1,0 +1,90 @@
+{
+  "design_space": {
+    "design_type": "front_wing_discrete_v1",
+    "variables": [
+      {
+        "name": "main_profile",
+        "type": "categorical",
+        "domain": ["NACA4412", "NACA6412", "S1223", "E423"],
+        "one_hot_group": "profile_choice",
+        "default": "NACA4412",
+        "description": "Main element airfoil profile"
+      },
+      {
+        "name": "flap_angle_bin",
+        "type": "categorical",
+        "domain": ["0deg", "10deg", "20deg", "30deg"],
+        "one_hot_group": "flap_angle",
+        "default": "10deg",
+        "description": "Flap deflection angle"
+      },
+      {
+        "name": "gurney_flap",
+        "type": "binary",
+        "domain": [0, 1],
+        "default": 0,
+        "description": "Gurney flap presence (on/off)"
+      },
+      {
+        "name": "endplate_louvers",
+        "type": "categorical",
+        "domain": ["none", "2_louvers", "4_louvers", "6_louvers"],
+        "one_hot_group": "louver_config",
+        "default": "none",
+        "description": "Endplate louver configuration"
+      }
+    ],
+    "metadata": {
+      "author": "Q-AERO Team",
+      "created_at": "2026-02-16T00:00:00Z",
+      "version": "1.0.0"
+    }
+  },
+  "flow": {
+    "velocity": 50,
+    "alpha": 3.5,
+    "yaw": 0,
+    "rho": 1.225,
+    "ride_height": 0.1
+  },
+  "objective": {
+    "weights": {
+      "downforce": 0.7,
+      "drag": 0.3,
+      "balance": 0.0
+    },
+    "constraints": [
+      {
+        "type": "cl_min",
+        "value": 2.0
+      },
+      {
+        "type": "cd_max",
+        "value": 0.5
+      }
+    ],
+    "method": "weighted_sum"
+  },
+  "quantum": {
+    "p_layers": 3,
+    "shots": 1024,
+    "method": "auto",
+    "optimizer": "COBYLA",
+    "max_iterations": 100,
+    "seed": 42
+  },
+  "validation": {
+    "top_k": 3,
+    "require_vlm": true,
+    "vlm_tolerance": 0.15
+  },
+  "sampling": {
+    "n_candidates": 100,
+    "method": "lhs"
+  },
+  "metadata": {
+    "request_id": "monaco_race_setup_001",
+    "tags": ["front_wing", "monaco_gp", "high_downforce"],
+    "user_id": "engineer_42"
+  }
+}

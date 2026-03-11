@@ -1,0 +1,57 @@
+{
+  "model": "ZF26 EVO 3",
+  "source": "AirShaper CFD (108.6M cells)",
+  "date": "2026-03-11",
+  "n_qubits": 18,
+  "baseline": {
+    "frontal_area": 1.504,
+    "planform_area": 7.444,
+    "mesh_cells": 108583042.0,
+    "converged_at": 4000.0,
+    "Cd": 0.765,
+    "Cl": -1.978,
+    "Cl_f": -0.759,
+    "Cl_r": -1.219,
+    "L_D": -2.585,
+    "Fx": 3420.0,
+    "Fy": -37.6,
+    "Fz": -8840.0,
+    "balance_front": 0.384,
+    "balance_rear": 0.616,
+    "V_inf": 69.66351291601619,
+    "V_inf_kmh": 250.78864649765828
+  },
+  "targets": {
+    "Cd_target": 0.73,
+    "Cl_target": -2.4,
+    "L_D_target": 3.288,
+    "balance_target": 0.44,
+    "Cl_f_target": -1.056,
+    "Cl_r_target": -1.344
+  },
+  "optimal_bitstring": "000000001101100000",
+  "optimal_params": {
+    "fw_flap": 5.0,
+    "fw_aoa": 12.0,
+    "rw_angle": 5.0,
+    "diff_exp": 9.0,
+    "rh_front": 45.0,
+    "rh_rear": 30.0,
+    "gurney": 0.0,
+    "cooling": 50.0
+  },
+  "optimal_aero": {
+    "Cd": 0.7486734693877551,
+    "Cl": -2.124326530612245,
+    "Cl_f": -0.7290000000000001,
+    "Cl_r": -1.395326530612245,
+    "balance": 0.3431675825231526,
+    "L_D": 2.8374540002725914
+  },
+  "method": "D-Wave SA",
+  "backends_tested": {
+    "dwave_sa": true,
+    "cudaq_gpu": false,
+    "scipy_fallback": true
+  }
+}

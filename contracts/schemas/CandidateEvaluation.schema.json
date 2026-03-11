@@ -1,0 +1,102 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "CandidateEvaluation.schema.json",
+  "title": "Candidate Evaluation",
+  "description": "ML/VLM evaluation result for a design candidate",
+  "type": "object",
+  "required": ["candidate_id", "design", "performance", "source"],
+  "properties": {
+    "candidate_id": {
+      "type": "string",
+      "description": "Unique identifier for this candidate"
+    },
+    "design": {
+      "type": "object",
+      "description": "Design variable values",
+      "additionalProperties": true,
+      "examples": [
+        {
+          "main_profile": "NACA4412",
+          "flap_angle_bin": "10deg",
+          "gurney_flap": 1
+        }
+      ]
+    },
+    "performance": {
+      "type": "object",
+      "description": "Aerodynamic performance metrics",
+      "required": ["cl", "cd"],
+      "properties": {
+        "cl": {
+          "type": "number",
+          "description": "Lift coefficient"
+        },
+        "cd": {
+          "type": "number",
+          "description": "Drag coefficient"
+        },
+        "cm": {
+          "type": "number",
+          "description": "Moment coefficient",
+          "default": 0
+        },
+        "ld_ratio": {
+          "type": "number",
+          "description": "Lift-to-drag ratio (Cl/Cd)"
+        },
+        "balance_metric": {
+          "type": "number",
+          "description": "Front/rear balance [0-1]",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "stall_risk": {
+          "type": "number",
+          "description": "Stall risk indicator [0-1]",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "source": {
+      "type": "string",
+      "description": "Evaluation source",
+      "enum": ["ml_surrogate", "vlm", "openfoam", "wind_tunnel"]
+    },
+    "confidence": {
+      "type": "number",
+      "description": "Prediction confidence score [0-1]",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "inference_time_ms": {
+      "type": "number",
+      "description": "Time to evaluate [milliseconds]",
+      "minimum": 0
+    },
+    "cached": {
+      "type": "boolean",
+      "description": "Whether result was cached",
+      "default": false
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional metadata",
+      "properties": {
+        "model_version": {
+          "type": "string",
+          "description": "ML model version (if source=ml_surrogate)"
+        },
+        "panel_count": {
+          "type": "integer",
+          "description": "VLM panel count (if source=vlm)"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

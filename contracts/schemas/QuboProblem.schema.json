@@ -1,0 +1,102 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "QuboProblem.schema.json",
+  "title": "QUBO Problem",
+  "description": "Quadratic Unconstrained Binary Optimization problem definition",
+  "type": "object",
+  "required": ["n_variables", "Q_matrix"],
+  "properties": {
+    "n_variables": {
+      "type": "integer",
+      "description": "Number of binary variables",
+      "minimum": 1,
+      "maximum": 100,
+      "examples": [10, 16, 20]
+    },
+    "Q_matrix": {
+      "type": "array",
+      "description": "Quadratic coefficient matrix (n_variables × n_variables, symmetric)",
+      "minItems": 1,
+      "maxItems": 100,
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        }
+      }
+    },
+    "linear_terms": {
+      "type": "array",
+      "description": "Linear coefficient vector (optional, if not included in Q_matrix diagonal)",
+      "items": {
+        "type": "number"
+      }
+    },
+    "offset": {
+      "type": "number",
+      "description": "Constant offset to objective function",
+      "default": 0
+    },
+    "constraints": {
+      "type": "object",
+      "description": "Constraint definitions (encoded as penalties in QUBO)",
+      "properties": {
+        "one_hot_groups": {
+          "type": "array",
+          "description": "Groups of variables where exactly one must be 1",
+          "items": {
+            "type": "array",
+            "description": "Indices of variables in one-hot group (0-based)",
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "minItems": 2
+          }
+        },
+        "penalty_weights": {
+          "type": "object",
+          "description": "Penalty weights for constraint violations",
+          "properties": {
+            "one_hot": {
+              "type": "number",
+              "description": "Penalty for violating one-hot constraints",
+              "minimum": 0,
+              "default": 100
+            },
+            "custom": {
+              "type": "array",
+              "description": "Custom penalty terms",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "weight": {"type": "number"},
+                  "expression": {"type": "string"}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Problem metadata",
+      "properties": {
+        "problem_type": {
+          "type": "string",
+          "enum": ["max_cut", "vertex_cover", "aero_design", "portfolio", "custom"]
+        },
+        "source": {
+          "type": "string",
+          "description": "Source of QUBO formulation (e.g., 'ml_surrogate_fit')"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}
