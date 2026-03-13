@@ -149,5 +149,362 @@
       "Matches_Optimal": true,
       "Approx_Ratio": 1.0
     }
-  ]
+  ],
+  "part_iii_coupled": {
+    "description": "Aero-Powertrain Coupled 24-Qubit Optimization",
+    "n_qubits": 24,
+    "n_configurations": 16777216,
+    "circuit": "Barcelona",
+    "power_unit": {
+      "ice_power_hp": 600.0,
+      "ice_power_kw": 447.42,
+      "ers_power_kw": 350.0,
+      "battery_capacity_mj": 4.0,
+      "total_power_hp": 1069.3576505297037
+    },
+    "design_variables": {
+      "ers_straight_1": {
+        "name": "ERS Deploy: Main Straight",
+        "unit": "on/off",
+        "range": [
+          0,
+          1
+        ],
+        "n_bits": 1,
+        "qubit_start": 18
+      },
+      "ers_straight_2": {
+        "name": "ERS Deploy: Back Straight",
+        "unit": "on/off",
+        "range": [
+          0,
+          1
+        ],
+        "n_bits": 1,
+        "qubit_start": 19
+      },
+      "ers_straight_3": {
+        "name": "ERS Deploy: T10-T12 Straight",
+        "unit": "on/off",
+        "range": [
+          0,
+          1
+        ],
+        "n_bits": 1,
+        "qubit_start": 20
+      },
+      "rpm_target": {
+        "name": "Engine RPM Target",
+        "unit": "RPM",
+        "range": [
+          10000,
+          13000
+        ],
+        "n_bits": 2,
+        "qubit_start": 21
+      },
+      "aero_mode": {
+        "name": "Active Aero: Z(0)/X(1) Mode",
+        "unit": "mode",
+        "range": [
+          0,
+          1
+        ],
+        "n_bits": 1,
+        "qubit_start": 23
+      }
+    },
+    "optimal_solution": {
+      "energy": -0.6710292673274472,
+      "bits": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        1,
+        0,
+        0
+      ],
+      "decoded": {
+        "aero": {
+          "fw_flap": 5.0,
+          "fw_aoa": 12.0,
+          "rw_angle": 5.0,
+          "diff_exp": 10.0,
+          "rh_front": 45.0,
+          "rh_rear": 30.0,
+          "gurney": 0.0,
+          "cooling": 50.0
+        },
+        "ers_deploy": [
+          true,
+          true,
+          false
+        ],
+        "rpm_target": "12000",
+        "aero_mode": "Z-Mode"
+      },
+      "performance": {
+        "Cd": 0.749,
+        "Cl": -2.153,
+        "L_D": 2.8744993324432575,
+        "lap_time_s": 73.71501547765533,
+        "final_soc_pct": 57.06231861458333
+      }
+    },
+    "sa_solver": {
+      "energy": -0.07838470209171575,
+      "time_s": 0.49086627399083227,
+      "num_reads": 2000
+    },
+    "ws_qaoa_from_bf": {
+      "energy": -0.6710292673274472,
+      "time_s": 359.6370699950203,
+      "found_optimal": true
+    },
+    "ws_qaoa_from_sa": {
+      "energy": -0.07838470209171575,
+      "time_s": 298.44941537600243,
+      "found_optimal": false
+    },
+    "comparison_vs_aero_only": {
+      "aero_only_lap_time": 72.64902183872549,
+      "coupled_lap_time": 73.71501547765533,
+      "delta_lap_s": 1.0659936389298394,
+      "soc_advantage_pct": 30.411003686011902
+    }
+  },
+  "part_iv_jeddah_ers": {
+    "description": "Jeddah Corniche ERS Energy Management \u2014 D-Wave Quantum Optimization",
+    "circuit": "Jeddah Corniche",
+    "circuit_length_m": 5370,
+    "n_zones": 12,
+    "n_qubits": 12,
+    "n_configurations": 4096,
+    "regulations": {
+      "mgu_k_power_kw": 350,
+      "battery_mj": 4.0,
+      "mgu_h": "removed (2026)",
+      "ice_power_hp": 600
+    },
+    "brute_force_optimal": {
+      "cost": 0.3971040452912446,
+      "bits": [
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "deploy": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "harvest": [
+        0.6,
+        0.6,
+        0.6,
+        0.6
+      ],
+      "rpm": 12000,
+      "lap_time_s": 80.69856671053498,
+      "final_soc_pct": 25.131722410714286
+    },
+    "dwave_sa": {
+      "cost": 0.4012615157379686,
+      "found_optimal": false,
+      "time_s": 0.8532007809844799,
+      "num_reads": 5000,
+      "lap_time_s": 80.74861559620618
+    },
+    "dwave_tabu": {
+      "cost": 0.4012615157379686,
+      "found_optimal": false,
+      "time_s": 2500.4819369439792,
+      "lap_time_s": 80.74861559620618
+    },
+    "multi_lap": {
+      "n_laps": 10,
+      "strategies": {
+        "All Deploy": {
+          "total_time_s": 806.9856671053499,
+          "avg_lap_s": 80.69856671053499,
+          "consistency_s": 1.4210854715202004e-14,
+          "final_soc_pct": 41.886204017857146,
+          "lap_times": [
+            80.69856671053498,
+            80.69856671053498,
+            80.69856671053498,
+            80.69856671053498,
+            80.69856671053498,
+            80.69856671053498,
+            80.69856671053498,
+            80.69856671053498,
+            80.69856671053498,
+            80.69856671053498
+          ]
+        },
+        "No Deploy": {
+          "total_time_s": 885.6921379303479,
+          "avg_lap_s": 88.56921379303478,
+          "consistency_s": 0.0,
+          "final_soc_pct": 100.0,
+          "lap_times": [
+            88.56921379303478,
+            88.56921379303478,
+            88.56921379303478,
+            88.56921379303478,
+            88.56921379303478,
+            88.56921379303478,
+            88.56921379303478,
+            88.56921379303478,
+            88.56921379303478,
+            88.56921379303478
+          ]
+        },
+        "Best Naive": {
+          "total_time_s": 806.9856671053499,
+          "avg_lap_s": 80.69856671053499,
+          "consistency_s": 1.4210854715202004e-14,
+          "final_soc_pct": 41.886204017857146,
+          "lap_times": [
+            80.69856671053498,
+            80.69856671053498,
+            80.69856671053498,
+            80.69856671053498,
+            80.69856671053498,
+            80.69856671053498,
+            80.69856671053498,
+            80.69856671053498,
+            80.69856671053498,
+            80.69856671053498
+          ]
+        },
+        "D-Wave SA": {
+          "total_time_s": 807.4861559620616,
+          "avg_lap_s": 80.74861559620618,
+          "consistency_s": 0.0,
+          "final_soc_pct": 25.131722410714286,
+          "lap_times": [
+            80.74861559620618,
+            80.74861559620618,
+            80.74861559620618,
+            80.74861559620618,
+            80.74861559620618,
+            80.74861559620618,
+            80.74861559620618,
+            80.74861559620618,
+            80.74861559620618,
+            80.74861559620618
+          ]
+        },
+        "BF Optimal": {
+          "total_time_s": 806.9856671053499,
+          "avg_lap_s": 80.69856671053499,
+          "consistency_s": 1.4210854715202004e-14,
+          "final_soc_pct": 25.131722410714286,
+          "lap_times": [
+            80.69856671053498,
+            80.69856671053498,
+            80.69856671053498,
+            80.69856671053498,
+            80.69856671053498,
+            80.69856671053498,
+            80.69856671053498,
+            80.69856671053498,
+            80.69856671053498,
+            80.69856671053498
+          ]
+        }
+      }
+    },
+    "naive_strategies": {
+      "All Deploy": {
+        "deploy_pattern": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "lap_time_s": 80.69856671053498,
+        "final_soc_pct": 41.886204017857146
+      },
+      "Long Only": {
+        "deploy_pattern": [
+          true,
+          false,
+          false,
+          true
+        ],
+        "lap_time_s": 83.60465178715029,
+        "final_soc_pct": 41.886204017857146
+      },
+      "No Deploy": {
+        "deploy_pattern": [
+          false,
+          false,
+          false,
+          false
+        ],
+        "lap_time_s": 88.56921379303478,
+        "final_soc_pct": 100.0
+      },
+      "Alternate": {
+        "deploy_pattern": [
+          true,
+          false,
+          true,
+          false
+        ],
+        "lap_time_s": 85.00925957418102,
+        "final_soc_pct": 93.82948929231642
+      },
+      "Final Push": {
+        "deploy_pattern": [
+          false,
+          false,
+          false,
+          true
+        ],
+        "lap_time_s": 85.90530247280407,
+        "final_soc_pct": 41.886204017857146
+      },
+      "Front Load": {
+        "deploy_pattern": [
+          true,
+          true,
+          false,
+          false
+        ],
+        "lap_time_s": 84.62178156396564,
+        "final_soc_pct": 100.0
+      }
+    }
+  }
 }
