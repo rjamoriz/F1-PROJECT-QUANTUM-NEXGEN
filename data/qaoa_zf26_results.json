@@ -506,5 +506,107 @@
         "final_soc_pct": 100.0
       }
     }
+  },
+  "part_v_ice_ers_coupled": {
+    "description": "Jeddah ICE\u2194ERS Coupled Energy Strategy \u2014 24-Qubit Quantum Optimization",
+    "circuit": "Jeddah Corniche",
+    "n_qubits": 24,
+    "n_zones": 12,
+    "encoding": "2 bits per zone: 00=HARVEST, 01=COAST, 10/11=DEPLOY",
+    "regulations": {
+      "ice_hp": 600,
+      "ers_kw": 350,
+      "battery_mj": 4.0,
+      "mgu_h": "REMOVED (2026)"
+    },
+    "overtaking_analysis": {
+      "S1 Straight (T1-T3)": {
+        "delta_v_kmh": 62.27462380402027,
+        "delta_t_ms": 2300.650685653787,
+        "energy_cost_kj": 3566.0008141123176,
+        "efficiency_ms_per_kj": 0.6451626922094483
+      },
+      "T6-T8 Straight": {
+        "delta_v_kmh": 62.27462380402027,
+        "delta_t_ms": 1646.781543415342,
+        "energy_cost_kj": 2552.505845890922,
+        "efficiency_ms_per_kj": 0.6451626922094481
+      },
+      "T14-T16 Mid Straight": {
+        "delta_v_kmh": 62.27462380402027,
+        "delta_t_ms": 1259.303533199968,
+        "energy_cost_kj": 1951.916235093058,
+        "efficiency_ms_per_kj": 0.6451626922094483
+      },
+      "T22-T24 Acc. Straight": {
+        "delta_v_kmh": 62.27462380402027,
+        "delta_t_ms": 2663.911320230701,
+        "energy_cost_kj": 4129.053574235315,
+        "efficiency_ms_per_kj": 0.6451626922094483
+      }
+    },
+    "dwave_sa_solution": {
+      "modes": [
+        "DEPLOY",
+        "DEPLOY",
+        "DEPLOY",
+        "DEPLOY",
+        "DEPLOY",
+        "DEPLOY",
+        "DEPLOY",
+        "DEPLOY",
+        "DEPLOY",
+        "DEPLOY",
+        "DEPLOY",
+        "DEPLOY"
+      ],
+      "cost": 0.103388009685829,
+      "lap_time_s": 81.02757308338171,
+      "final_soc_pct": 12.565861205357143,
+      "solve_time_s": 17.885175818984862,
+      "n_deploys": 12,
+      "n_harvests": 0
+    },
+    "race_simulation": {
+      "n_laps": 50,
+      "winner": "Smart Hybrid",
+      "strategies": {
+        "D-Wave SA Quantum": {
+          "total_time_s": 4051.378654169089,
+          "avg_lap_s": 81.02757308338171,
+          "consistency_s": 0.0,
+          "final_soc_pct": 12.565861205357143,
+          "depleted_lap": null
+        },
+        "Smart Hybrid": {
+          "total_time_s": 4034.928335526751,
+          "avg_lap_s": 80.69856671053498,
+          "consistency_s": 0.0,
+          "final_soc_pct": 51.3546736587136,
+          "depleted_lap": null
+        },
+        "Overtake Focus": {
+          "total_time_s": 4180.232589357518,
+          "avg_lap_s": 83.60465178715027,
+          "consistency_s": 1.4210854715202004e-14,
+          "final_soc_pct": 51.3546736587136,
+          "depleted_lap": null
+        },
+        "All Deploy": {
+          "total_time_s": 4051.378654169089,
+          "avg_lap_s": 81.02757308338171,
+          "consistency_s": 0.0,
+          "final_soc_pct": 12.565861205357143,
+          "depleted_lap": null
+        },
+        "All Coast": {
+          "total_time_s": 4428.460689651734,
+          "avg_lap_s": 88.56921379303478,
+          "consistency_s": 0.0,
+          "final_soc_pct": 100.0,
+          "depleted_lap": null
+        }
+      }
+    }
   }
 }
