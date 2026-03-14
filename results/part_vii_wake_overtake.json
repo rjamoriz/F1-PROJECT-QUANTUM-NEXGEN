@@ -1,0 +1,46 @@
+{
+  "part": "VII",
+  "title": "Quantum Wake Aerodynamics & Overtake Decision Optimization",
+  "circuit": "Jeddah Corniche",
+  "circuit_length_m": 4880,
+  "n_zones": 9,
+  "qubits": 18,
+  "wake_model": {
+    "max_downforce_loss_pct": 50.0,
+    "max_slipstream_benefit_pct": 15.0,
+    "max_thermal_rise_C": 25,
+    "max_tire_wear_multiplier": 1.8
+  },
+  "qubo_solution": {
+    "winner_solver": "SA",
+    "qubo_energy": -44.60099046989788,
+    "strategy_sequence": [
+      "FOLLOW",
+      "ATTACK",
+      "FOLLOW",
+      "ATTACK",
+      "FOLLOW",
+      "FOLLOW",
+      "ATTACK",
+      "FOLLOW",
+      "FOLLOW"
+    ],
+    "lap_time_delta_s": 3.2867106532040697,
+    "attack_zones": 3,
+    "overtake_probability": 1.3,
+    "final_soc_pct": 0.0,
+    "max_T_coolant_C": 118.72029090235065
+  },
+  "multi_lap_analysis": {
+    "n_laps_analyzed": 8,
+    "optimal_attack_lap": 1,
+    "net_race_impact_s": -2.6888555721182614,
+    "vs_never_attack_advantage_s": 47.11879052147015,
+    "overtake_prob_at_optimal": 0.4084
+  },
+  "baseline_comparisons": {
+    "all_follow_delta_s": 3.588651316174973,
+    "all_attack_delta_s": 10.03580739956348,
+    "all_conserve_delta_s": 0.1237210323575324
+  }
+}
