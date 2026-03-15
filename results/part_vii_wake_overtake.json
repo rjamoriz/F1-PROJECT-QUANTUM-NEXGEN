@@ -1,46 +1,180 @@
 {
   "part": "VII",
-  "title": "Quantum Wake Aerodynamics & Overtake Decision Optimization",
+  "title": "44-Qubit One-Hot QUBO \u2014 Wake Aero & Overtake Decision (2026)",
   "circuit": "Jeddah Corniche",
   "circuit_length_m": 4880,
-  "n_zones": 9,
-  "qubits": 18,
+  "n_zones": 11,
+  "n_strategies": 6,
+  "strategies": [
+    "FOLLOW",
+    "PREPARE",
+    "CONSERVE",
+    "ATTACK",
+    "SHADOW",
+    "Z-ATTACK"
+  ],
+  "n_variables": 66,
+  "effective_dof": 55,
+  "encoding": "one-hot",
   "wake_model": {
-    "max_downforce_loss_pct": 50.0,
-    "max_slipstream_benefit_pct": 15.0,
-    "max_thermal_rise_C": 25,
-    "max_tire_wear_multiplier": 1.8
+    "type": "double-exponential distance-based",
+    "max_front_loss_pct": 35.0,
+    "max_rear_loss_pct": 25.0,
+    "lambda1_near_m": 8.0,
+    "lambda2_far_m": 35.0,
+    "slipstream_benefit_pct": 12.0,
+    "thermal_rise_max_C": 22,
+    "train_factor": 1.18
+  },
+  "active_aero": {
+    "z_mode_Cd_reduction": 0.12,
+    "z_mode_gap_limit_s": 1.0,
+    "x_mode_Cl_gain": 0.06
+  },
+  "tire_model": {
+    "SOFT": {
+      "grip_mult": 1.08,
+      "base_wear_rate": 0.042,
+      "thermal_opt_C": 105,
+      "thermal_window": 15,
+      "cliff_life_frac": 0.35,
+      "cliff_drop": 0.25
+    },
+    "MEDIUM": {
+      "grip_mult": 1.0,
+      "base_wear_rate": 0.028,
+      "thermal_opt_C": 100,
+      "thermal_window": 20,
+      "cliff_life_frac": 0.3,
+      "cliff_drop": 0.2
+    },
+    "HARD": {
+      "grip_mult": 0.93,
+      "base_wear_rate": 0.018,
+      "thermal_opt_C": 95,
+      "thermal_window": 25,
+      "cliff_life_frac": 0.25,
+      "cliff_drop": 0.15
+    }
   },
   "qubo_solution": {
     "winner_solver": "SA",
-    "qubo_energy": -44.60099046989788,
+    "qubo_energy": -66956.08355426154,
     "strategy_sequence": [
       "FOLLOW",
-      "ATTACK",
+      "PREPARE",
       "FOLLOW",
-      "ATTACK",
+      "PREPARE",
       "FOLLOW",
       "FOLLOW",
-      "ATTACK",
+      "FOLLOW",
+      "PREPARE",
+      "FOLLOW",
       "FOLLOW",
       "FOLLOW"
     ],
-    "lap_time_delta_s": 3.2867106532040697,
-    "attack_zones": 3,
-    "overtake_probability": 1.3,
+    "lap_time_delta_s": -1528.5629335869173,
+    "attack_zones": 0,
+    "overtake_probability": 0.0,
     "final_soc_pct": 0.0,
-    "max_T_coolant_C": 118.72029090235065
+    "final_tire_life": 0.9425627049180328,
+    "max_T_coolant_C": 105.84164440299467
   },
   "multi_lap_analysis": {
     "n_laps_analyzed": 8,
-    "optimal_attack_lap": 1,
-    "net_race_impact_s": -2.6888555721182614,
-    "vs_never_attack_advantage_s": 47.11879052147015,
-    "overtake_prob_at_optimal": 0.4084
+    "optimal_attack_lap": 8,
+    "net_race_impact_s": -12228.200223962232,
+    "vs_never_attack_advantage_s": 0.04332067615905544,
+    "overtake_prob_at_optimal": 0.0,
+    "compound_comparison": {
+      "SOFT": {
+        "best_attack_lap": 8,
+        "net_impact": -12228.200223962232
+      },
+      "MEDIUM": {
+        "best_attack_lap": 8,
+        "net_impact": -12228.200223962232
+      },
+      "HARD": {
+        "best_attack_lap": 8,
+        "net_impact": -12228.200223962232
+      }
+    }
   },
   "baseline_comparisons": {
-    "all_follow_delta_s": 3.588651316174973,
-    "all_attack_delta_s": 10.03580739956348,
-    "all_conserve_delta_s": 0.1237210323575324
+    "all_follow_delta_s": -1528.5196129107594,
+    "all_attack_delta_s": -1528.7286692147961,
+    "all_conserve_delta_s": -1528.4786120005901,
+    "all_shadow_delta_s": -1528.621602850298,
+    "train_3car_delta_s": -1528.5782129026709
+  },
+  "multi_circuit": {
+    "Monaco": {
+      "delta_t": -2702.2805136607876,
+      "attack_zones": 1,
+      "ot_prob": 0.15,
+      "n_z_mode": 1,
+      "strategies": [
+        "FOLLOW",
+        "Z-ATTACK",
+        "FOLLOW",
+        "FOLLOW",
+        "FOLLOW"
+      ]
+    },
+    "Monza": {
+      "delta_t": -1389.4393201373116,
+      "attack_zones": 2,
+      "ot_prob": 0.55,
+      "n_z_mode": 2,
+      "strategies": [
+        "FOLLOW",
+        "Z-ATTACK",
+        "FOLLOW",
+        "Z-ATTACK",
+        "FOLLOW"
+      ]
+    },
+    "Jeddah": {
+      "delta_t": -1528.5629335869173,
+      "attack_zones": 0,
+      "ot_prob": 0.0,
+      "n_z_mode": 0,
+      "strategies": [
+        "FOLLOW",
+        "PREPARE",
+        "FOLLOW",
+        "PREPARE",
+        "FOLLOW",
+        "FOLLOW",
+        "FOLLOW",
+        "PREPARE",
+        "FOLLOW",
+        "FOLLOW",
+        "FOLLOW"
+      ]
+    }
+  },
+  "weight_sensitivity": {
+    "w_time": {
+      "flips_at_0.5x": 3,
+      "flips_at_1.5x": 3
+    },
+    "w_tire": {
+      "flips_at_0.5x": 3,
+      "flips_at_1.5x": 3
+    },
+    "w_thermal": {
+      "flips_at_0.5x": 3,
+      "flips_at_1.5x": 3
+    },
+    "w_attack": {
+      "flips_at_0.5x": 3,
+      "flips_at_1.5x": 3
+    },
+    "w_soc": {
+      "flips_at_0.5x": 3,
+      "flips_at_1.5x": 3
+    }
   }
 }
