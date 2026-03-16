@@ -1,0 +1,245 @@
+{
+  "part": "IX",
+  "title": "2026 Active Aero Quantum Optimization",
+  "circuit": "Jeddah Corniche",
+  "n_vars": 154,
+  "n_sectors": 11,
+  "solver": "Tabu",
+  "solver_energy": -221.75808821015113,
+  "lap_time_s": 70.92015171600247,
+  "sector_time_s": 70.84335171600246,
+  "transition_penalty_s": 0.0768,
+  "advantage_vs_best_uniform_s": 0.025257337501770394,
+  "race_advantage_50lap_s": 1.2628668750885197,
+  "qaoa": {
+    "n_qubits": 12,
+    "n_layers": 4,
+    "final_energy": -0.25948442760878965,
+    "best_cost_s": 17.690448873091455,
+    "classical_best_s": 17.682059628050137,
+    "gap_s": 0.008389245041318105,
+    "critical_sectors": [
+      "T17-T19 Sweep",
+      "S3 Main Straight",
+      "T20-T22 Chicane"
+    ]
+  },
+  "sectors": [
+    {
+      "name": "T1-T3 Braking",
+      "mode": "Z-Mode",
+      "front_deg": 2.0,
+      "rear_deg": 0.0,
+      "rh_front_mm": 35.0,
+      "rh_rear_mm": 55.0,
+      "Cd": 0.337,
+      "Cl": 4.254,
+      "balance": 0.385,
+      "time_s": 8.3478
+    },
+    {
+      "name": "S1 Straight",
+      "mode": "Z-Mode",
+      "front_deg": 2.0,
+      "rear_deg": 0.0,
+      "rh_front_mm": 30.0,
+      "rh_rear_mm": 65.0,
+      "Cd": 0.3385,
+      "Cl": 4.111,
+      "balance": 0.431,
+      "time_s": 5.5618
+    },
+    {
+      "name": "T4-T7 Esses",
+      "mode": "Z-Mode",
+      "front_deg": 2.0,
+      "rear_deg": 0.0,
+      "rh_front_mm": 30.0,
+      "rh_rear_mm": 65.0,
+      "Cd": 0.3385,
+      "Cl": 4.111,
+      "balance": 0.431,
+      "time_s": 9.249
+    },
+    {
+      "name": "S2 Back Straight",
+      "mode": "Z-Mode",
+      "front_deg": 2.0,
+      "rear_deg": 0.0,
+      "rh_front_mm": 30.0,
+      "rh_rear_mm": 65.0,
+      "Cd": 0.3385,
+      "Cl": 4.111,
+      "balance": 0.431,
+      "time_s": 6.6314
+    },
+    {
+      "name": "T8-T12 Sector",
+      "mode": "Z-Mode",
+      "front_deg": 2.0,
+      "rear_deg": 0.0,
+      "rh_front_mm": 25.0,
+      "rh_rear_mm": 65.0,
+      "Cd": 0.3364,
+      "Cl": 4.309,
+      "balance": 0.457,
+      "time_s": 9.8143
+    },
+    {
+      "name": "T13-T16 Flow",
+      "mode": "Z-Mode",
+      "front_deg": 2.0,
+      "rear_deg": 0.0,
+      "rh_front_mm": 35.0,
+      "rh_rear_mm": 75.0,
+      "Cd": 0.3421,
+      "Cl": 3.773,
+      "balance": 0.434,
+      "time_s": 5.8241
+    },
+    {
+      "name": "T17-T19 Sweep",
+      "mode": "Z-Mode",
+      "front_deg": 2.0,
+      "rear_deg": 0.0,
+      "rh_front_mm": 35.0,
+      "rh_rear_mm": 55.0,
+      "Cd": 0.337,
+      "Cl": 4.254,
+      "balance": 0.385,
+      "time_s": 4.8865
+    },
+    {
+      "name": "S3 Main Straight",
+      "mode": "Z-Mode",
+      "front_deg": 2.0,
+      "rear_deg": 0.0,
+      "rh_front_mm": 30.0,
+      "rh_rear_mm": 65.0,
+      "Cd": 0.3385,
+      "Cl": 4.111,
+      "balance": 0.431,
+      "time_s": 5.8973
+    },
+    {
+      "name": "T20-T22 Chicane",
+      "mode": "M-Mode",
+      "front_deg": 2.0,
+      "rear_deg": 8.0,
+      "rh_front_mm": 35.0,
+      "rh_rear_mm": 75.0,
+      "Cd": 0.4061,
+      "Cl": 3.933,
+      "balance": 0.416,
+      "time_s": 6.8478
+    },
+    {
+      "name": "T23-T26 Sweep",
+      "mode": "M-Mode",
+      "front_deg": 2.0,
+      "rear_deg": 8.0,
+      "rh_front_mm": 30.0,
+      "rh_rear_mm": 75.0,
+      "Cd": 0.4045,
+      "Cl": 4.08,
+      "balance": 0.434,
+      "time_s": 4.9428
+    },
+    {
+      "name": "T27 Final Braking",
+      "mode": "M-Mode",
+      "front_deg": 2.0,
+      "rear_deg": 8.0,
+      "rh_front_mm": 25.0,
+      "rh_rear_mm": 55.0,
+      "Cd": 0.397,
+      "Cl": 4.784,
+      "balance": 0.411,
+      "time_s": 2.8404
+    }
+  ],
+  "transitions": [
+    {
+      "from": "T1-T3 Braking",
+      "to": "S1 Straight",
+      "delta_front_deg": 0.0,
+      "delta_rear_deg": 0.0,
+      "penalty_s": 0.0
+    },
+    {
+      "from": "S1 Straight",
+      "to": "T4-T7 Esses",
+      "delta_front_deg": 0.0,
+      "delta_rear_deg": 0.0,
+      "penalty_s": 0.0
+    },
+    {
+      "from": "T4-T7 Esses",
+      "to": "S2 Back Straight",
+      "delta_front_deg": 0.0,
+      "delta_rear_deg": 0.0,
+      "penalty_s": 0.0
+    },
+    {
+      "from": "S2 Back Straight",
+      "to": "T8-T12 Sector",
+      "delta_front_deg": 0.0,
+      "delta_rear_deg": 0.0,
+      "penalty_s": 0.0
+    },
+    {
+      "from": "T8-T12 Sector",
+      "to": "T13-T16 Flow",
+      "delta_front_deg": 0.0,
+      "delta_rear_deg": 0.0,
+      "penalty_s": 0.0
+    },
+    {
+      "from": "T13-T16 Flow",
+      "to": "T17-T19 Sweep",
+      "delta_front_deg": 0.0,
+      "delta_rear_deg": 0.0,
+      "penalty_s": 0.0
+    },
+    {
+      "from": "T17-T19 Sweep",
+      "to": "S3 Main Straight",
+      "delta_front_deg": 0.0,
+      "delta_rear_deg": 0.0,
+      "penalty_s": 0.0
+    },
+    {
+      "from": "S3 Main Straight",
+      "to": "T20-T22 Chicane",
+      "delta_front_deg": 0.0,
+      "delta_rear_deg": 8.0,
+      "penalty_s": 0.0768
+    },
+    {
+      "from": "T20-T22 Chicane",
+      "to": "T23-T26 Sweep",
+      "delta_front_deg": 0.0,
+      "delta_rear_deg": 0.0,
+      "penalty_s": 0.0
+    },
+    {
+      "from": "T23-T26 Sweep",
+      "to": "T27 Final Braking",
+      "delta_front_deg": 0.0,
+      "delta_rear_deg": 0.0,
+      "penalty_s": 0.0
+    }
+  ],
+  "sensitivity": {
+    "front_deg": 0.32512,
+    "rear_deg": 1.75743,
+    "rh_front": 0.07957,
+    "rh_rear": 0.11865
+  },
+  "comparison": {
+    "optimized": 70.9202,
+    "All Z-Mode": 70.9454,
+    "All M-Mode": 74.7271,
+    "All X-Mode": 76.6189
+  }
+}
