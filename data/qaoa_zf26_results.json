@@ -72,7 +72,7 @@
         "p": 1,
         "epsilon": 0.1
       },
-      "speedup_vs_standard": 36.77256516127205
+      "speedup_vs_standard": 49.3841759772489
     },
     "rqaoa": {
       "energy": 0.11753935570610846,
@@ -97,7 +97,7 @@
       "Method": "Brute-Force (exact)",
       "Category": "Classical",
       "Energy": 0.11753935570610846,
-      "Time_s": 11.871748069002933,
+      "Time_s": 12.467017939000016,
       "Matches_Optimal": true,
       "Approx_Ratio": 1.0
     },
@@ -105,7 +105,7 @@
       "Method": "D-Wave SA",
       "Category": "D-Wave",
       "Energy": 0.11797053206143643,
-      "Time_s": 0.19996367499697953,
+      "Time_s": 0.20939306699983717,
       "Matches_Optimal": true,
       "Approx_Ratio": 0.9963450503461032
     },
@@ -113,7 +113,7 @@
       "Method": "D-Wave Tabu",
       "Category": "D-Wave",
       "Energy": 0.11797053206143654,
-      "Time_s": 21.08620876999339,
+      "Time_s": 21.227455634999842,
       "Matches_Optimal": true,
       "Approx_Ratio": 0.9963450503461023
     },
@@ -121,7 +121,7 @@
       "Method": "QAOA p=3",
       "Category": "QAOA",
       "Energy": 0.11828570945254524,
-      "Time_s": 46.447684205995756,
+      "Time_s": 53.15232006500014,
       "Matches_Optimal": false,
       "Approx_Ratio": 0.9936902458471857
     },
@@ -129,7 +129,7 @@
       "Method": "CVaR-QAOA \u03b1=0.10",
       "Category": "Advanced QAOA",
       "Energy": 0.11849802311797605,
-      "Time_s": 41.51255197900173,
+      "Time_s": 38.976348345999895,
       "Matches_Optimal": false,
       "Approx_Ratio": 0.9919098446822767
     },
@@ -137,7 +137,7 @@
       "Method": "WS-QAOA p=1 \u03b5=0.10",
       "Category": "Advanced QAOA",
       "Energy": 0.11753935570610846,
-      "Time_s": 1.2983391730085714,
+      "Time_s": 1.111185346000184,
       "Matches_Optimal": true,
       "Approx_Ratio": 1.0
     },
@@ -145,7 +145,7 @@
       "Method": "RQAOA (8-fix)",
       "Category": "Advanced QAOA",
       "Energy": 0.11753935570610846,
-      "Time_s": 0.0014528910105582327,
+      "Time_s": 0.0011484300002848613,
       "Matches_Optimal": true,
       "Approx_Ratio": 1.0
     }
@@ -271,17 +271,17 @@
     },
     "sa_solver": {
       "energy": -0.07838470209171575,
-      "time_s": 0.49086627399083227,
+      "time_s": 0.4874987789999068,
       "num_reads": 2000
     },
     "ws_qaoa_from_bf": {
       "energy": -0.6710292673274472,
-      "time_s": 359.6370699950203,
+      "time_s": 276.16258926699993,
       "found_optimal": true
     },
     "ws_qaoa_from_sa": {
       "energy": -0.07838470209171575,
-      "time_s": 298.44941537600243,
+      "time_s": 253.3875239930003,
       "found_optimal": false
     },
     "comparison_vs_aero_only": {
@@ -339,14 +339,14 @@
     "dwave_sa": {
       "cost": 0.4012615157379686,
       "found_optimal": false,
-      "time_s": 0.8532007809844799,
+      "time_s": 0.8745938640004169,
       "num_reads": 5000,
       "lap_time_s": 80.74861559620618
     },
     "dwave_tabu": {
       "cost": 0.4012615157379686,
       "found_optimal": false,
-      "time_s": 2500.4819369439792,
+      "time_s": 2500.467901956001,
       "lap_time_s": 80.74861559620618
     },
     "multi_lap": {
@@ -563,7 +563,7 @@
       "cost": 0.103388009685829,
       "lap_time_s": 81.02757308338171,
       "final_soc_pct": 12.565861205357143,
-      "solve_time_s": 17.885175818984862,
+      "solve_time_s": 17.50793586799955,
       "n_deploys": 12,
       "n_harvests": 0
     },
@@ -607,6 +607,63 @@
           "depleted_lap": null
         }
       }
+    }
+  },
+  "part_vi_energy_mgmt": {
+    "title": "Part VI: Quantum-Optimized Braking & Acceleration Energy Management (2026 Regs)",
+    "circuit": "Jeddah Corniche",
+    "zones": 16,
+    "qubits_zone_qubo": 32,
+    "qubits_multilap": 20,
+    "total_qubits": 52,
+    "regulations": {
+      "mguk_kw": 350,
+      "mgu_h": false,
+      "battery_mj": 4.0,
+      "ice_hp": 540,
+      "fuel_flow_kgh": 70
+    },
+    "zone_optimization": {
+      "winner": "SA",
+      "best_energy": -137.46549849874518,
+      "total_regen_mj": 12.110708333355626,
+      "total_deploy_mj": 6.05540275799254,
+      "net_battery_mj": 6.055305575363087
+    },
+    "multilap_strategy": {
+      "n_save": 0,
+      "n_normal": 6,
+      "n_push": 0,
+      "n_attack": 4,
+      "total_time_delta_s": -2.4,
+      "soc_range": [
+        0.49722014383742774,
+        1.0
+      ]
+    },
+    "overtake_analysis": {
+      "viable_zones": 5,
+      "quantum_budget_mj": 3.8,
+      "naive_budget_mj": 3.6,
+      "improvement_pct": 5.555555555555548
+    }
+  },
+  "part_xii_tensor_decomposition": {
+    "tensor_shape": [
+      10,
+      8,
+      5
+    ],
+    "fill_rate": 31.25,
+    "cp_rank": 3,
+    "n_qubos_analyzed": 8,
+    "solver_guide": {
+      "small_any": "WS-QAOA or RQAOA",
+      "medium_sparse": "D-Wave SA",
+      "medium_dense": "CVaR-QAOA",
+      "large_sparse": "D-Wave Tabu",
+      "large_dense": "ma-QAOA",
+      "very_large": "TN-QAOA (MPS)"
     }
   }
 }

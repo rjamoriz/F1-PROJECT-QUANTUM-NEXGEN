@@ -1,0 +1,345 @@
+{
+  "part": "XII",
+  "title": "Tensor Decomposition \u2014 Grand Cross-Analysis of Quantum Optimization",
+  "tensor_shape": [
+    10,
+    8,
+    5
+  ],
+  "methods": [
+    "Brute-Force",
+    "D-Wave SA",
+    "D-Wave Tabu",
+    "QAOA p=3",
+    "CVaR-QAOA",
+    "WS-QAOA",
+    "RQAOA",
+    "ma-QAOA",
+    "FALQON",
+    "TN-QAOA"
+  ],
+  "problems": [
+    "P-I  18q Aero",
+    "P-III 24q Coupled",
+    "P-IV  12q Jeddah",
+    "P-V   24q ICE-ERS",
+    "P-VI  52q Brake",
+    "P-VII 44q Wake",
+    "P-VIII 64q ERS",
+    "P-X   80q Reg"
+  ],
+  "metrics": [
+    "norm_energy",
+    "log10_solve_time",
+    "approx_ratio",
+    "n_qubits",
+    "solution_quality"
+  ],
+  "fill_rate": 31.25,
+  "cp_decomposition": {
+    "rank": 3,
+    "method_factors": [
+      [
+        -0.31368047020813083,
+        0.040020127109046365,
+        -0.0015679118793634967
+      ],
+      [
+        -0.3500784281169575,
+        -0.2176920464164343,
+        0.690120385210209
+      ],
+      [
+        -0.33430368262159116,
+        -0.15025144932941745,
+        -0.6485190528854565
+      ],
+      [
+        -0.3136810181229044,
+        0.04002101802873179,
+        -0.0014968542517025223
+      ],
+      [
+        -0.31368101812290433,
+        0.040021018028731786,
+        -0.0014968542517025272
+      ],
+      [
+        -0.31368101812290433,
+        0.040021018028731786,
+        -0.0014968542517025272
+      ],
+      [
+        -0.31368101812290433,
+        0.040021018028731786,
+        -0.0014968542517025272
+      ],
+      [
+        -0.339622355948427,
+        -0.16293465393559245,
+        -0.2673228382148846
+      ],
+      [
+        -0.200863647983245,
+        0.9259872641198584,
+        0.046485508607528946
+      ],
+      [
+        -0.343537523859075,
+        -0.19500313337507047,
+        0.17182278365175097
+      ]
+    ],
+    "problem_factors": [
+      [
+        -5.752432463166126e-15,
+        4.690162280830268e-15,
+        -1.3383806205897526e-12
+      ],
+      [
+        0.0012357794885561682,
+        -0.0004302999607456713,
+        0.999999143845133
+      ],
+      [
+        -6.227923279841553e-15,
+        4.958919530377554e-15,
+        -9.89116742666164e-13
+      ],
+      [
+        -5.76789895297086e-15,
+        4.338901714423087e-15,
+        -1.3326872864247792e-14
+      ],
+      [
+        0.7933189404134237,
+        -0.6088049896147782,
+        -0.001242337101212172
+      ],
+      [
+        -5.849252941323896e-15,
+        4.474511297920143e-15,
+        -2.0823500129675108e-13
+      ],
+      [
+        -5.771040363241582e-15,
+        4.4287839243074095e-15,
+        9.122506073612764e-18
+      ],
+      [
+        0.6088050029610295,
+        0.7933197964642593,
+        -0.00041098360977764067
+      ]
+    ],
+    "metric_factors": [
+      [
+        -3.4414900082728745e-15,
+        -1.0012736541710845e-14,
+        -0.0037544874833654596
+      ],
+      [
+        -1.3780870651433666e-14,
+        -8.805115914987306e-14,
+        -0.03366107937284003
+      ],
+      [
+        0.9408896617620452,
+        0.3387132185039501,
+        -7.698566857906619e-13
+      ],
+      [
+        -4.708803702110366e-13,
+        -9.6183404560853e-13,
+        -0.9994262531868933
+      ],
+      [
+        0.3387132185039501,
+        -0.940889661762045,
+        7.477255717651206e-13
+      ]
+    ]
+  },
+  "qubo_fingerprints": {
+    "P-I  18q": {
+      "n_vars": 18.0,
+      "sparsity": 0.0,
+      "coupling_density": 1.0,
+      "spectral_range": 0.17612575188511637,
+      "condition_number": 4.061099413084601,
+      "diag_dominance": 23.52212281162625,
+      "frustration_index": 0.43137254901960786,
+      "spectral_gap": 0.021098466060843278,
+      "norm_frobenius": 0.0006146186078443931
+    },
+    "P-III 24q": {
+      "n_vars": 24.0,
+      "sparsity": 0.07246376811594203,
+      "coupling_density": 0.927536231884058,
+      "spectral_range": 0.2927545923668249,
+      "condition_number": 0.8823438694024236,
+      "diag_dominance": 19.72655943118638,
+      "frustration_index": 0.5078125,
+      "spectral_gap": 0.051552493450551226,
+      "norm_frobenius": 0.000481622635455498
+    },
+    "P-IV  12q": {
+      "n_vars": 12.0,
+      "sparsity": 0.8106060606060606,
+      "coupling_density": 0.18939393939393945,
+      "spectral_range": 0.8093883637222146,
+      "condition_number": 0.6366800487766552,
+      "diag_dominance": 0.37151995464288284,
+      "frustration_index": 0.8,
+      "spectral_gap": 0.17529890286064698,
+      "norm_frobenius": 0.006402543894939228
+    },
+    "P-V  24q": {
+      "n_vars": 24.0,
+      "sparsity": 0.5,
+      "coupling_density": 0.5,
+      "spectral_range": 0.26759809411351476,
+      "condition_number": 0.8156121302494849,
+      "diag_dominance": 9.028210874614324,
+      "frustration_index": 0.9746376811594203,
+      "spectral_gap": 0.05271536335282513,
+      "norm_frobenius": 0.000888122711663548
+    },
+    "P-VI  52q": {
+      "n_vars": 16.0,
+      "sparsity": 0.8,
+      "coupling_density": 0.19999999999999996,
+      "spectral_range": 16.78770839976236,
+      "condition_number": 1.4688258581055136,
+      "diag_dominance": 0.017944536388665135,
+      "frustration_index": 0.20833333333333334,
+      "spectral_gap": 0.6412531139486957,
+      "norm_frobenius": 0.07597154036609188
+    },
+    "P-VII 44q": {
+      "n_vars": 66.0,
+      "sparsity": 0.8111888111888111,
+      "coupling_density": 0.18881118881118886,
+      "spectral_range": 2746.0979585059395,
+      "condition_number": 0.09006755654192956,
+      "diag_dominance": 52.25232305932198,
+      "frustration_index": 0.9506172839506173,
+      "spectral_gap": 20.357799718344268,
+      "norm_frobenius": 2.5562238702871487
+    },
+    "P-VIII 64q": {
+      "n_vars": 64.0,
+      "sparsity": 0.0,
+      "coupling_density": 1.0,
+      "spectral_range": 1629.205212360766,
+      "condition_number": 6.256289317820459,
+      "diag_dominance": 2.290218093370185,
+      "frustration_index": 1.0,
+      "spectral_gap": 26.44185517073467,
+      "norm_frobenius": 0.38038775351070825
+    },
+    "P-X  80q": {
+      "n_vars": 80.0,
+      "sparsity": 0.7227848101265822,
+      "coupling_density": 0.27721518987341776,
+      "spectral_range": 385.55054010180174,
+      "condition_number": 14.104177993629385,
+      "diag_dominance": 0.562252240616134,
+      "frustration_index": 1.0,
+      "spectral_gap": 0.17902108716038967,
+      "norm_frobenius": 0.0991221115009451
+    }
+  },
+  "recommendations": [
+    {
+      "problem": "P-I  18q Aero",
+      "best_method": "Brute-Force",
+      "reasons": [
+        "small problem (18 vars) \u2014 exact methods viable",
+        "dense coupling (1.00) benefits from global methods (QAOA variants)",
+        "strongly diagonal-dominant (23.5) \u2014 linear terms dominate, SA efficient",
+        "high frustration (0.43) \u2014 many competing couplings, terrain-aware methods preferred"
+      ]
+    },
+    {
+      "problem": "P-III 24q Coupled",
+      "best_method": "Brute-Force",
+      "reasons": [
+        "moderate size (24 vars) \u2014 heuristics fast",
+        "dense coupling (0.93) benefits from global methods (QAOA variants)",
+        "strongly diagonal-dominant (19.7) \u2014 linear terms dominate, SA efficient",
+        "high frustration (0.51) \u2014 many competing couplings, terrain-aware methods preferred"
+      ]
+    },
+    {
+      "problem": "P-IV  12q Jeddah",
+      "best_method": "Brute-Force",
+      "reasons": [
+        "small problem (12 vars) \u2014 exact methods viable",
+        "high sparsity (0.81) favors local search (SA/Tabu)",
+        "weak diagonal (0.37) \u2014 strong qubit interactions, quantum advantage zone",
+        "high frustration (0.80) \u2014 many competing couplings, terrain-aware methods preferred"
+      ]
+    },
+    {
+      "problem": "P-V   24q ICE-ERS",
+      "best_method": "D-Wave SA",
+      "reasons": []
+    },
+    {
+      "problem": "P-VI  52q Brake",
+      "best_method": "D-Wave SA",
+      "reasons": [
+        "small problem (16 vars) \u2014 exact methods viable",
+        "high sparsity (0.80) favors local search (SA/Tabu)",
+        "weak diagonal (0.02) \u2014 strong qubit interactions, quantum advantage zone"
+      ]
+    },
+    {
+      "problem": "P-VII 44q Wake",
+      "best_method": "D-Wave SA",
+      "reasons": [
+        "large problem (66 vars) \u2014 scalable solvers needed",
+        "high sparsity (0.81) favors local search (SA/Tabu)",
+        "strongly diagonal-dominant (52.3) \u2014 linear terms dominate, SA efficient",
+        "high frustration (0.95) \u2014 many competing couplings, terrain-aware methods preferred"
+      ]
+    },
+    {
+      "problem": "P-VIII 64q ERS",
+      "best_method": "D-Wave SA",
+      "reasons": [
+        "large problem (64 vars) \u2014 scalable solvers needed",
+        "dense coupling (1.00) benefits from global methods (QAOA variants)",
+        "high frustration (1.00) \u2014 many competing couplings, terrain-aware methods preferred"
+      ]
+    },
+    {
+      "problem": "P-X   80q Reg",
+      "best_method": "TN-QAOA",
+      "reasons": []
+    }
+  ],
+  "scalability": {
+    "Brute-Force": {
+      "slope_log10s_per_qubit": 0.3617418798381638,
+      "n_problems_tested": 3
+    },
+    "D-Wave SA": {
+      "slope_log10s_per_qubit": 0.024695913936417582,
+      "n_problems_tested": 8
+    },
+    "D-Wave Tabu": {
+      "slope_log10s_per_qubit": 0.005087078390706906,
+      "n_problems_tested": 7
+    }
+  },
+  "solver_guide": {
+    "small_any": "WS-QAOA or RQAOA",
+    "medium_sparse": "D-Wave SA",
+    "medium_dense": "CVaR-QAOA",
+    "large_sparse": "D-Wave Tabu",
+    "large_dense": "ma-QAOA",
+    "very_large": "TN-QAOA (MPS)"
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "part": "X",
+  "title": "2026 Regulatory Quantum Optimization with Tensor Networks",
+  "qubo_size": 80,
+  "methods": {
+    "sa": {
+      "energy": -32.13435259784774,
+      "time_s": 11.39,
+      "config": {
+        "ice_fraction": 0.56,
+        "deploy_strategy": "conservative",
+        "aero_package": "Z-Max",
+        "ride_height": "Low",
+        "Cd": 0.72,
+        "Cl": -1.628,
+        "front_weight": 0.45,
+        "cg_height_mm": 280,
+        "diffuser_angle_deg": 12,
+        "tunnel_depth_mm": 44,
+        "oh_violations": 0
+      }
+    },
+    "tabu": {
+      "energy": -32.13835259782747,
+      "time_s": 2500.51
+    },
+    "ma_qaoa": {
+      "energy": -24.004844323766722,
+      "time_s": 253.17,
+      "qubits": 16,
+      "layers": 3,
+      "params": 51
+    },
+    "falqon": {
+      "energy": 143.41750070100014,
+      "time_s": 36.68,
+      "layers": 15,
+      "monotone_rate": 0.5
+    },
+    "tn_qaoa": {
+      "energy": -126.85234336293733,
+      "time_s": 39.56,
+      "qubits": 80,
+      "chi": 32,
+      "best_params": [
+        0.1,
+        1.22
+      ]
+    }
+  },
+  "regs_2026": {
+    "ice_power_kw": 400,
+    "mguk_power_kw": 350,
+    "total_power_kw": 750,
+    "power_split_target": 0.53,
+    "battery_deploy_mj": 4.0,
+    "mguh_present": false,
+    "fuel_flow_kg_h": 100,
+    "min_weight_kg": 768,
+    "wheelbase_max_mm": 3400,
+    "width_mm": 2000,
+    "front_weight_min": 0.44,
+    "front_weight_max": 0.46,
+    "transition_time_s": 0.3,
+    "z_mode_gap_required": 1.0,
+    "floor_clearance_min_mm": 15,
+    "floor_clearance_max_mm": 50,
+    "diffuser_angle_max_deg": 12,
+    "tunnel_depth_mm": 50
+  },
+  "pareto_solutions": 1
+}

@@ -1,0 +1,126 @@
+{
+  "part": "XI",
+  "title": "Geometric Deep Learning for Aerodynamic Shape Optimization",
+  "methods": {
+    "gnn_mlp": {
+      "type": "Graph Neural Network with MLP head",
+      "parameters": 44739,
+      "best_val_loss": 0.019034026190638542,
+      "training_epochs": 55,
+      "training_time_s": 114.99,
+      "val_mae": {
+        "Cd": 0.00373,
+        "Cl": 0.030806,
+        "balance": 0.008017
+      }
+    },
+    "gnn_tt": {
+      "type": "Graph Neural Network with Tensor Train head",
+      "parameters": 43043,
+      "tt_rank": 4,
+      "best_val_loss": 0.01774328015744686,
+      "training_epochs": 96,
+      "training_time_s": 169.11,
+      "val_mae": {
+        "Cd": 0.003506,
+        "Cl": 0.028266
+      },
+      "compression_ratio": 4.51
+    }
+  },
+  "shape_optimization": {
+    "method": "Differentiable backpropagation through frozen GNN surrogate",
+    "iterations": 300,
+    "baseline": {
+      "Cd": 0.765,
+      "Cl": -1.978,
+      "balance": 0.45
+    },
+    "optimized": {
+      "Cd": 0.76248,
+      "Cl": -2.20001,
+      "balance": 0.34175
+    },
+    "delta": {
+      "Cd": -0.00252,
+      "Cl": -0.22201
+    },
+    "efficiency": {
+      "baseline_L_D": 2.586,
+      "optimized_L_D": 2.885
+    },
+    "top_modifications": {
+      "fl_ride_h": {
+        "normalized": -0.4461,
+        "actual_delta": -1.3384,
+        "unit": "mm"
+      },
+      "sp_inlet": {
+        "normalized": -0.3443,
+        "actual_delta": -0.0048,
+        "unit": "ratio"
+      },
+      "fl_tunnel_d": {
+        "normalized": 0.3218,
+        "actual_delta": 1.2874,
+        "unit": "mm"
+      },
+      "rw_chord": {
+        "normalized": 0.2838,
+        "actual_delta": 15.8942,
+        "unit": "mm"
+      },
+      "fl_diff_angle": {
+        "normalized": 0.1956,
+        "actual_delta": 0.176,
+        "unit": "deg"
+      },
+      "fw_camber": {
+        "normalized": 0.1647,
+        "actual_delta": 0.002,
+        "unit": "ratio"
+      },
+      "sp_coke": {
+        "normalized": 0.164,
+        "actual_delta": 0.0128,
+        "unit": "ratio"
+      },
+      "rear_beam": {
+        "normalized": -0.1577,
+        "actual_delta": -0.1893,
+        "unit": "deg"
+      },
+      "fw_endplate": {
+        "normalized": -0.1272,
+        "actual_delta": -2.8616,
+        "unit": "mm"
+      },
+      "fw_aoa": {
+        "normalized": -0.091,
+        "actual_delta": -0.2184,
+        "unit": "deg"
+      }
+    }
+  },
+  "dataset": {
+    "n_samples": 500,
+    "n_shape_params": 20,
+    "n_nodes_per_graph": 60,
+    "label_stats": {
+      "Cd": {
+        "mean": 0.7752,
+        "std": 0.0322
+      },
+      "Cl": {
+        "mean": -2.0014,
+        "std": 0.3717
+      }
+    }
+  },
+  "frameworks": {
+    "pytorch": "2.2.2",
+    "torch_geometric": false,
+    "tensorly": false,
+    "device": "cpu"
+  }
+}
