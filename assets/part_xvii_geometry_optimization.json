@@ -1,0 +1,45 @@
+{
+  "part": "XVII",
+  "title": "Continuous Geometry Optimization \u2014 Week 4",
+  "timestamp": "2026-03-20T20:19:45.245994+00:00",
+  "optimization": {
+    "lbfgsb": {
+      "n_starts": 20,
+      "n_feasible": 0,
+      "best_LD": null,
+      "best_pred": null
+    },
+    "de": {
+      "best_LD": 144.8162912175837,
+      "best_pred": [
+        0.3779433533549309,
+        2.5634039402008058,
+        -0.9927763879299164,
+        156.30342483520508
+      ],
+      "feasible": "False",
+      "n_seeds": 5,
+      "n_feasible_seeds": 0
+    },
+    "top_candidates": []
+  },
+  "vlm_validation": {
+    "n_candidates": 0,
+    "n_vlm_feasible": 0,
+    "best_vlm_LD": null,
+    "baseline_LD": -48.91415896811559,
+    "improvement_pct": null,
+    "candidates": []
+  },
+  "cfd_holdout_check": {
+    "mean_delta_LD": 259.46360117349104,
+    "mean_delta_Cd": 0.9676214823939728,
+    "max_delta_LD": 605.5706374388628,
+    "n_holdout_samples": 10
+  },
+  "optimizer_comparison": {
+    "lbfgsb_trace_len": 0,
+    "de_trace_len": 241,
+    "top5_mean_diversity": 0.0
+  }
+}

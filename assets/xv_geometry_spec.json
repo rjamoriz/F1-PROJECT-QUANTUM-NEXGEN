@@ -1,0 +1,29 @@
+{
+  "spec": {
+    "span_mm": 1850,
+    "chord_root_mm": 500,
+    "chord_tip_mm": 280,
+    "sweep_deg": 12.0,
+    "dihedral_deg": 5.0,
+    "n_elements": 4,
+    "z_mode_range_deg": 5.0,
+    "endplate_height_mm": 100,
+    "min_thickness_mm": 8.0
+  },
+  "ffd_grid": [
+    4,
+    3,
+    2
+  ],
+  "n_cp": 24,
+  "n_dof": 72,
+  "n_latent": 8,
+  "variance_explained": 0.3283198077859635,
+  "n_valid_samples": 500,
+  "pass_rate": 1.0,
+  "bounds": {
+    "chord_max_mm": 15.0,
+    "span_max_mm": 10.0,
+    "vert_max_mm": 20.0
+  }
+}

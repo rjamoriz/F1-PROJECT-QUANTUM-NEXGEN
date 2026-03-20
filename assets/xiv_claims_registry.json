@@ -1,0 +1,250 @@
+{
+  "timestamp": "2026-03-20T20:14:07Z",
+  "n_claims": 21,
+  "tier_counts": {
+    "1": 0,
+    "2": 2,
+    "3": 0,
+    "4": 19
+  },
+  "domain_counts": {
+    "quantum": 11,
+    "aero": 3,
+    "strategy": 2,
+    "energy": 1,
+    "ml": 4
+  },
+  "claims": [
+    {
+      "claim_id": "I.1",
+      "part": "I",
+      "domain": "quantum",
+      "claim": "16-qubit QUBO captures front/rear wing + ride-height trade-offs",
+      "evidence_tier": 4,
+      "data_source": "Synthetic cost function",
+      "metric_value": "E*=0.1175",
+      "next_validation": "VLM sweep to validate variable-to-Cl/Cd mapping",
+      "blocks_downstream": true
+    },
+    {
+      "claim_id": "I.2",
+      "part": "I",
+      "domain": "quantum",
+      "claim": "SA finds optimal configuration within 0.3s on 16-var QUBO",
+      "evidence_tier": 4,
+      "data_source": "Exact solver cross-check",
+      "metric_value": "gap=8.1295",
+      "next_validation": "Compare with OpenFOAM single-point check",
+      "blocks_downstream": false
+    },
+    {
+      "claim_id": "III.1",
+      "part": "III",
+      "domain": "quantum",
+      "claim": "Ising transformation preserves ground state",
+      "evidence_tier": 4,
+      "data_source": "Algebraic verification",
+      "metric_value": "\u0394E=-0.483535",
+      "next_validation": "None \u2014 mathematical identity",
+      "blocks_downstream": false
+    },
+    {
+      "claim_id": "III.2",
+      "part": "III",
+      "domain": "quantum",
+      "claim": "Spectral gap = 0.1790 indicates moderate optimization landscape",
+      "evidence_tier": 4,
+      "data_source": "Eigenvalue computation",
+      "metric_value": "gap=0.1790",
+      "next_validation": "Compare with known hard instances",
+      "blocks_downstream": false
+    },
+    {
+      "claim_id": "IV.1",
+      "part": "IV",
+      "domain": "quantum",
+      "claim": "p=3 QAOA achieves approx ratio 0.2503",
+      "evidence_tier": 4,
+      "data_source": "Statevector simulation",
+      "metric_value": "AR=0.2503",
+      "next_validation": "Hardware noise model simulation",
+      "blocks_downstream": false
+    },
+    {
+      "claim_id": "IV.2",
+      "part": "IV",
+      "domain": "quantum",
+      "claim": "QAOA probability concentrates on ground + first-excited states",
+      "evidence_tier": 4,
+      "data_source": "Probability distribution",
+      "metric_value": "p(GS)=0.0124",
+      "next_validation": "Shot-noise study at realistic shot counts",
+      "blocks_downstream": false
+    },
+    {
+      "claim_id": "V.1",
+      "part": "V",
+      "domain": "quantum",
+      "claim": "40-qubit coupled QUBO links aero + PU design variables",
+      "evidence_tier": 4,
+      "data_source": "SA on larger formulation",
+      "metric_value": "E*=-0.6710",
+      "next_validation": "VLM with PU-aero interaction model",
+      "blocks_downstream": true
+    },
+    {
+      "claim_id": "VI.1",
+      "part": "VI",
+      "domain": "aero",
+      "claim": "Jeddah QUBO (12q) optimizes sector-specific aero configs",
+      "evidence_tier": 4,
+      "data_source": "Synthetic sector model",
+      "metric_value": "E*=0.3971",
+      "next_validation": "Circuit-specific CFD at 3+ operating points",
+      "blocks_downstream": true
+    },
+    {
+      "claim_id": "VII.1",
+      "part": "VII",
+      "domain": "strategy",
+      "claim": "Multi-lap tire+ERS strategy QUBO finds race-optimal plan",
+      "evidence_tier": 4,
+      "data_source": "Lap-time model",
+      "metric_value": "n_vars=66",
+      "next_validation": "Lap simulation with degradation model",
+      "blocks_downstream": false
+    },
+    {
+      "claim_id": "VIII.1",
+      "part": "VIII",
+      "domain": "strategy",
+      "claim": "DRS/overtake QUBO (64q) identifies attack windows",
+      "evidence_tier": 4,
+      "data_source": "Wake + slipstream model",
+      "metric_value": "best_E=-112.1719",
+      "next_validation": "Multi-car CFD wake validation",
+      "blocks_downstream": false
+    },
+    {
+      "claim_id": "IX.1",
+      "part": "IX",
+      "domain": "energy",
+      "claim": "Z-Mode/X-Mode sector scheduling optimized via QAOA",
+      "evidence_tier": 4,
+      "data_source": "Energy balance model",
+      "metric_value": "n_vars=154",
+      "next_validation": "On-track telemetry correlation",
+      "blocks_downstream": false
+    },
+    {
+      "claim_id": "X.1",
+      "part": "X",
+      "domain": "quantum",
+      "claim": "ma-QAOA competitive with SA/Tabu on 16-var subproblem",
+      "evidence_tier": 4,
+      "data_source": "Matched benchmark (XIII.1)",
+      "metric_value": "regret=167.422345",
+      "next_validation": "Hardware QPU comparison at noise-matched scale",
+      "blocks_downstream": false
+    },
+    {
+      "claim_id": "X.2",
+      "part": "X",
+      "domain": "quantum",
+      "claim": "TN-QAOA extends simulation to ~80 qubits via MPS",
+      "evidence_tier": 4,
+      "data_source": "Bond-dim convergence (XIII.3)",
+      "metric_value": "\u03c7_max=32",
+      "next_validation": "Truncation sensitivity + larger \u03c7 sweep",
+      "blocks_downstream": false
+    },
+    {
+      "claim_id": "XI.1",
+      "part": "XI",
+      "domain": "ml",
+      "claim": "GNN surrogate predicts Cd/Cl from graph-encoded geometry",
+      "evidence_tier": 4,
+      "data_source": "Random train/test split",
+      "metric_value": "MAE_Cd=0.0037, MAE_Cl=0.0308",
+      "next_validation": "VLM-validated predictions on holdout geometries",
+      "blocks_downstream": true
+    },
+    {
+      "claim_id": "XI.2",
+      "part": "XI",
+      "domain": "ml",
+      "claim": "TT-compressed GNN head reduces parameters with minimal accuracy loss",
+      "evidence_tier": 4,
+      "data_source": "Same random split",
+      "metric_value": "MAE_Cd_TT=0.0035",
+      "next_validation": "Field-level (Cp) prediction comparison",
+      "blocks_downstream": false
+    },
+    {
+      "claim_id": "XI.3",
+      "part": "XI",
+      "domain": "ml",
+      "claim": "Shape optimization finds improved geometry within surrogate space",
+      "evidence_tier": 4,
+      "data_source": "Surrogate-in-the-loop opt",
+      "metric_value": "\u0394Cd=-2.13%",
+      "next_validation": "VLM + limited CFD on top-3 designs",
+      "blocks_downstream": true
+    },
+    {
+      "claim_id": "XII.1",
+      "part": "XII",
+      "domain": "quantum",
+      "claim": "Cross-QUBO tensor analysis identifies solver-problem affinity",
+      "evidence_tier": 4,
+      "data_source": "Imputed tensor (XIII.5)",
+      "metric_value": "fill=31.2%",
+      "next_validation": "Complete tensor with matched-size runs",
+      "blocks_downstream": false
+    },
+    {
+      "claim_id": "XIII.1",
+      "part": "XIII",
+      "domain": "quantum",
+      "claim": "Fair benchmark changes SA vs QAOA relative ranking",
+      "evidence_tier": 4,
+      "data_source": "Controlled experiment",
+      "metric_value": "\u0394_ranking=True",
+      "next_validation": "Larger seed count (100+) for tighter CIs",
+      "blocks_downstream": false
+    },
+    {
+      "claim_id": "XIII.2",
+      "part": "XIII",
+      "domain": "ml",
+      "claim": "OOD generalization gap = 1.0x for circuit transfer",
+      "evidence_tier": 4,
+      "data_source": "Leave-one-circuit-out CV",
+      "metric_value": "gap=1.0x",
+      "next_validation": "Real geometry OOD (not synthetic)",
+      "blocks_downstream": false
+    },
+    {
+      "claim_id": "AS.1",
+      "part": "Baseline",
+      "domain": "aero",
+      "claim": "AirShaper CFD baseline: Cd=0.765, Cl=-1.978, L/D=2.585",
+      "evidence_tier": 2,
+      "data_source": "AirShaper RANS CFD",
+      "metric_value": "balance=38.4%",
+      "next_validation": "Wind-tunnel correlation",
+      "blocks_downstream": false
+    },
+    {
+      "claim_id": "AS.2",
+      "part": "Baseline",
+      "domain": "aero",
+      "claim": "Front aero balance = 38.4% vs 44% target (deficit = 5.6pp)",
+      "evidence_tier": 2,
+      "data_source": "AirShaper force decomposition",
+      "metric_value": "Cl_f=-0.759, Cl_r=-1.219",
+      "next_validation": "VLM parametric sweep for balance correction",
+      "blocks_downstream": false
+    }
+  ]
+}

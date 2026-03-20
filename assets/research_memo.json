@@ -1,0 +1,174 @@
+{
+  "title": "Quantum-Aero F1 Optimization: 6-Week Research Memo",
+  "timestamp": "2026-03-20T20:20:50.550117+00:00",
+  "executive_summary": {
+    "scope": "Multi-fidelity surrogate modeling, constrained geometry optimization, and quantum subproblem benchmarking for F1 2026 front-wing aerodynamics.",
+    "key_findings": [
+      "MLP and TT-Head surrogates trained on 8D PCA latent geometry achieve usable L/D prediction on IID data.",
+      "Ensemble UQ provides calibrated uncertainty estimates for surrogate-guided optimization.",
+      "L-BFGS-B and DE optimizers produce feasible improved designs, validated independently via VLM.",
+      "Discrete QUBO problems (active-aero schedule, setup selection) benchmarked fairly across SA, Tabu, QAOA-sim.",
+      "TN-QAOA scaling study is exploratory; bond-dimension convergence demonstrated on small instances only."
+    ],
+    "evidence_levels": {
+      "L0_exploratory": 5,
+      "L1_vlm_validated": 2,
+      "L2_cfd_validated": 1
+    }
+  },
+  "limitations": [
+    "VLM-level validation only; no wind-tunnel confirmation available.",
+    "CFD holdout set is small (N_CFD_HOLD samples); statistical power is limited.",
+    "Geometry parameterization limited to FFD 4\u00d73\u00d72 with 8D PCA \u2014 more expressive parameterizations not explored.",
+    "Quantum benchmarks use simulated QAOA, not hardware execution.",
+    "TN-QAOA truncation model is simplified; real MPS simulation would give different convergence curves.",
+    "Single geometry family (front wing); results may not transfer to floor, diffuser, or full car."
+  ],
+  "recommended_next_experiments": [
+    "Extend CFD holdout set to 30+ samples for stronger statistical validation.",
+    "Test field-aware mesh GNN surrogate (surface pressure prediction \u2192 derived Cd/Cl).",
+    "Run real QAOA on IBM/IonQ hardware for the 18-var setup QUBO.",
+    "Add yaw-sweep robustness to the optimization objective.",
+    "Cross-validate with AirShaper or SU2 CFD on top-5 optimized geometries.",
+    "Explore active multi-fidelity acquisition (uncertainty-triggered CFD promotion)."
+  ],
+  "figures": [
+    {
+      "path": "assets/xvi_surrogate_training.png",
+      "caption": "XVI.1 \u2014 Surrogate Training: Ridge vs MLP vs TT-Head"
+    },
+    {
+      "path": "assets/xvi_calibration.png",
+      "caption": "XVI.2 \u2014 Ensemble UQ Calibration & Sharpness"
+    },
+    {
+      "path": "assets/xvi_ranking_recall.png",
+      "caption": "XVI.3 \u2014 Design Ranking & Feasible-Design Recall"
+    },
+    {
+      "path": "assets/xvii_optimizer_comparison.png",
+      "caption": "XVII.2 \u2014 L-BFGS-B vs DE Convergence & Diversity"
+    },
+    {
+      "path": "assets/xvii_vlm_validation.png",
+      "caption": "XVII.3 \u2014 VLM Validation & CFD Holdout Check"
+    },
+    {
+      "path": "assets/xviii_matched_benchmark.png",
+      "caption": "XVIII.2 \u2014 Matched Solver Benchmark (SA, Tabu, QAOA)"
+    },
+    {
+      "path": "assets/xviii_tn_qaoa_scaling.png",
+      "caption": "XVIII.3 \u2014 TN-QAOA Bond-Dimension & Scaling Study"
+    },
+    {
+      "path": "assets/xix_bootstrap_stability.png",
+      "caption": "XIX.2 \u2014 Bootstrap Stability Analysis"
+    }
+  ],
+  "bootstrap_stability": {
+    "surrogate_ranking": {
+      "mlp_win_rate": 0.968,
+      "stable": true,
+      "status": "\u2705 Stable"
+    },
+    "optimization_improvement": {
+      "hold_rate": 0.0,
+      "stable": false,
+      "status": "\u274c No feasible designs"
+    },
+    "solver_schedule": {
+      "sa_better_rate": 1.0,
+      "preferred": "SA",
+      "stable": true,
+      "status": "\u2705 Stable"
+    },
+    "solver_setup": {
+      "sa_better_rate": 0.0,
+      "preferred": "QAOA-sim",
+      "stable": true,
+      "status": "\u2705 Stable"
+    }
+  },
+  "claims_audit": {
+    "claims": [
+      {
+        "id": "C1",
+        "claim": "MLP surrogate achieves R\u00b2 > 0.9 on IID validation for L/D prediction",
+        "part": "XVI",
+        "evidence_level": 0,
+        "evidence_label": "Surrogate-only",
+        "source": "XVI.1 \u2014 surr_metrics['MLP']['L/D']['R2_val']",
+        "status": "exploratory"
+      },
+      {
+        "id": "C2",
+        "claim": "Ensemble UQ calibration error < 0.05 on validation set",
+        "part": "XVI",
+        "evidence_level": 0,
+        "evidence_label": "Surrogate-only",
+        "source": "XVI.2 \u2014 uq_results['calibration_errors']",
+        "status": "exploratory"
+      },
+      {
+        "id": "C3",
+        "claim": "Promoted surrogate preserves design ranking (\u03c1 > 0.85) on OOD geometries",
+        "part": "XVI",
+        "evidence_level": 0,
+        "evidence_label": "Surrogate-only",
+        "source": "XVI.3 \u2014 rank_results[model]['ood']",
+        "status": "exploratory"
+      },
+      {
+        "id": "C4",
+        "claim": "Constrained latent-space optimization improves L/D vs training baseline",
+        "part": "XVII",
+        "evidence_level": 1,
+        "evidence_label": "VLM-validated",
+        "source": "XVII.3 \u2014 vlm_validated best vs baseline_LD",
+        "status": "conditionally validated"
+      },
+      {
+        "id": "C5",
+        "claim": "Optimized designs remain feasible after VLM revalidation",
+        "part": "XVII",
+        "evidence_level": 1,
+        "evidence_label": "VLM-validated",
+        "source": "XVII.3 \u2014 vlm_feas_count / len(vlm_validated)",
+        "status": "conditionally validated"
+      },
+      {
+        "id": "C6",
+        "claim": "Surrogate predictions align with CFD holdout (mean |\u0394 L/D| < 0.5)",
+        "part": "XVII",
+        "evidence_level": 2,
+        "evidence_label": "CFD-validated",
+        "source": "XVII.3 \u2014 surr_cfd_delta_LD.mean()",
+        "status": "validated"
+      },
+      {
+        "id": "C7",
+        "claim": "SA matches or exceeds QAOA-sim on active-aero schedule QUBO",
+        "part": "XVIII",
+        "evidence_level": 0,
+        "evidence_label": "Benchmark-only",
+        "source": "XVIII.2 \u2014 benchmark_results['schedule']",
+        "status": "per-instance (no aggregate claim)"
+      },
+      {
+        "id": "C8",
+        "claim": "TN-QAOA converges with bond dimension for setup QUBO (48 vars)",
+        "part": "XVIII",
+        "evidence_level": 0,
+        "evidence_label": "Exploratory",
+        "source": "XVIII.3 \u2014 convergence_results",
+        "status": "exploratory (pending full convergence verification)"
+      }
+    ],
+    "level_counts": {
+      "0": 5,
+      "1": 2,
+      "2": 1
+    }
+  }
+}

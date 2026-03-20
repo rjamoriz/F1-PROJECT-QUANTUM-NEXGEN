@@ -1,0 +1,38 @@
+{
+  "hard_constraints": {
+    "Cd_max": 0.045,
+    "Cl_min": 0.8,
+    "Cl_max": 2.5,
+    "balance_lo": 0.42,
+    "balance_hi": 0.48,
+    "thickness_min_mm": 8.0
+  },
+  "soft_constraints": {
+    "Cd_target": 0.032,
+    "Cl_target": 1.6,
+    "L_D_min": 35.0,
+    "Cm_range": 0.05,
+    "rh_sensitivity": 0.1,
+    "yaw_robustness": 0.08
+  },
+  "feasibility_results": {
+    "n_evaluated": 200,
+    "n_feasible": 1,
+    "n_optimal": 0,
+    "n_rejected": 199,
+    "feasible_rate_pct": 0.5
+  },
+  "violation_frequency": {
+    "hard": {
+      "Cd_max": 187,
+      "Cl_min": 164,
+      "Cl_max": 13
+    },
+    "soft": {
+      "Cd_target": 200,
+      "Cl_target": 175,
+      "L_D_min": 199,
+      "Cm_range": 169
+    }
+  }
+}

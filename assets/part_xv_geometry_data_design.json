@@ -1,0 +1,153 @@
+{
+  "part": "XV \u2014 Geometry & Data Design",
+  "timestamp": "2026-03-20T20:30:25Z",
+  "plan_week": 2,
+  "geometry": {
+    "spec": {
+      "span_mm": 1850,
+      "chord_root_mm": 500,
+      "chord_tip_mm": 280,
+      "sweep_deg": 12.0,
+      "dihedral_deg": 5.0,
+      "n_elements": 4,
+      "z_mode_range_deg": 5.0,
+      "endplate_height_mm": 100,
+      "min_thickness_mm": 8.0
+    },
+    "ffd_grid": [
+      4,
+      3,
+      2
+    ],
+    "n_cp": 24,
+    "n_dof": 72,
+    "n_latent": 8,
+    "variance_explained": 0.3283198077859635,
+    "n_valid_samples": 500,
+    "pass_rate": 1.0,
+    "bounds": {
+      "chord_max_mm": 15.0,
+      "span_max_mm": 10.0,
+      "vert_max_mm": 20.0
+    }
+  },
+  "campaign": {
+    "n_vlm": 200,
+    "n_cfd_calibration": 20,
+    "n_cfd_holdout": 10,
+    "fidelity_ratio": "200:30",
+    "lhs_discrepancy": 0.056225718803668334,
+    "min_nn_distance": 26.934046468568425,
+    "coverage_ratio": 0.22777787000574573,
+    "vlm_cd_range": [
+      0.03207251693397937,
+      5.11603038934514
+    ],
+    "vlm_cl_range": [
+      -47.75440151716335,
+      5.878640395103224
+    ],
+    "sampling_method": "Latin Hypercube + nearest-neighbor snap"
+  },
+  "constraints": {
+    "hard_constraints": {
+      "Cd_max": 0.045,
+      "Cl_min": 0.8,
+      "Cl_max": 2.5,
+      "balance_lo": 0.42,
+      "balance_hi": 0.48,
+      "thickness_min_mm": 8.0
+    },
+    "soft_constraints": {
+      "Cd_target": 0.032,
+      "Cl_target": 1.6,
+      "L_D_min": 35.0,
+      "Cm_range": 0.05,
+      "rh_sensitivity": 0.1,
+      "yaw_robustness": 0.08
+    },
+    "feasibility_results": {
+      "n_evaluated": 200,
+      "n_feasible": 1,
+      "n_optimal": 0,
+      "n_rejected": 199,
+      "feasible_rate_pct": 0.5
+    },
+    "violation_frequency": {
+      "hard": {
+        "Cd_max": 187,
+        "Cl_min": 164,
+        "Cl_max": 13
+      },
+      "soft": {
+        "Cd_target": 200,
+        "Cl_target": 175,
+        "L_D_min": 199,
+        "Cm_range": 169
+      }
+    }
+  },
+  "regimes": {
+    "straight": {
+      "name": "Straight-Line Drag",
+      "V_kph": 320,
+      "AoA_deg": 2.0,
+      "z_mode": "stalled",
+      "rh_mm": 30,
+      "yaw_deg": 0.0,
+      "target_Cd": 0.028,
+      "target_Cl": 0.9,
+      "weight": 0.45
+    },
+    "cornering": {
+      "name": "Medium-Speed Cornering",
+      "V_kph": 180,
+      "AoA_deg": 6.0,
+      "z_mode": "deployed",
+      "rh_mm": 15,
+      "yaw_deg": 3.0,
+      "target_Cd": 0.038,
+      "target_Cl": 1.8,
+      "weight": 0.55
+    }
+  },
+  "cross_regime": {
+    "n_feasible_all": 1,
+    "rate_pct": 0.5,
+    "venn": {
+      "both": 1,
+      "straight_only": 2,
+      "cornering_only": 0,
+      "neither": 197
+    }
+  },
+  "data_requirements": {
+    "geometry": {
+      "family": "2026 Front Wing",
+      "parameterization": "FFD 4x3x2",
+      "n_dof": 72,
+      "n_latent": 8,
+      "variance_explained": "32.8%"
+    },
+    "data_budget": {
+      "VLM_samples": 200,
+      "CFD_calibration": 20,
+      "CFD_holdout": 10,
+      "regimes": [
+        "straight",
+        "cornering"
+      ],
+      "total_evaluations": 460
+    },
+    "constraints": {
+      "n_hard": 6,
+      "n_soft": 6,
+      "cross_regime_feasible_rate": "0.5%"
+    },
+    "downstream_consumers": [
+      "Part XVI (Week 3): Surrogate study \u2014 trains on VLM, validates on CFD holdout",
+      "Part XVII (Week 4): Constrained optimization in latent space",
+      "Part XVIII (Week 5): Quantum subproblem extraction from validated aero workflow"
+    ]
+  }
+}

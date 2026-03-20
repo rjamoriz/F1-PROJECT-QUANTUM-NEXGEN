@@ -1,0 +1,18 @@
+{
+  "n_vlm": 200,
+  "n_cfd_calibration": 20,
+  "n_cfd_holdout": 10,
+  "fidelity_ratio": "200:30",
+  "lhs_discrepancy": 0.056225718803668334,
+  "min_nn_distance": 26.934046468568425,
+  "coverage_ratio": 0.22777787000574573,
+  "vlm_cd_range": [
+    0.03207251693397937,
+    5.11603038934514
+  ],
+  "vlm_cl_range": [
+    -47.75440151716335,
+    5.878640395103224
+  ],
+  "sampling_method": "Latin Hypercube + nearest-neighbor snap"
+}

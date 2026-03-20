@@ -1,0 +1,230 @@
+{
+  "part": "XVIII",
+  "title": "Quantum Subproblem Study \u2014 Week 5",
+  "timestamp": "2026-03-20T20:20:33.125178+00:00",
+  "problems": {
+    "schedule": {
+      "name": "Active-Aero Schedule",
+      "n_vars": 48,
+      "n_sectors": 12,
+      "n_modes": 4,
+      "sector_types": [
+        "medium",
+        "slow",
+        "slow",
+        "straight",
+        "medium",
+        "medium",
+        "medium",
+        "straight",
+        "straight",
+        "chicane",
+        "chicane",
+        "medium"
+      ],
+      "Q_shape": [
+        48,
+        48
+      ],
+      "Q_nnz": 192
+    },
+    "setup": {
+      "name": "Setup Package Selection",
+      "n_vars": 18,
+      "n_components": 6,
+      "n_options": 3,
+      "Q_shape": [
+        18,
+        18
+      ],
+      "Q_nnz": 324
+    }
+  },
+  "benchmark": {
+    "n_seeds": 20,
+    "max_iter_budget": 2000,
+    "solvers": [
+      "SA",
+      "Tabu",
+      "QAOA-sim"
+    ],
+    "results": {
+      "schedule": {
+        "SA": {
+          "mean_energy": -106.38,
+          "std_energy": 2.5583393050961782,
+          "best_energy": -111.5,
+          "mean_regret": 0.1018995356690587,
+          "feasibility_rate": 1.0,
+          "success_rate_1pct": 0.0,
+          "mean_runtime": 0.017958247661590578,
+          "std_runtime": 0.0014672418930810449
+        },
+        "Tabu": {
+          "mean_energy": -118.44999999999997,
+          "std_energy": 2.842170943040401e-14,
+          "best_energy": -118.45,
+          "mean_regret": 0.0,
+          "feasibility_rate": 1.0,
+          "success_rate_1pct": 1.0,
+          "mean_runtime": 0.3483999252319336,
+          "std_runtime": 0.044438861459774145
+        },
+        "QAOA-sim": {
+          "mean_energy": -67.9125,
+          "std_energy": 7.383831576491977,
+          "best_energy": -81.15,
+          "mean_regret": 0.42665681722245663,
+          "feasibility_rate": 0.0,
+          "success_rate_1pct": 0.0,
+          "mean_runtime": 0.016912078857421874,
+          "std_runtime": 0.002662573520087577
+        }
+      },
+      "setup": {
+        "SA": {
+          "mean_energy": -59.247412757168,
+          "std_energy": 0.5803930217733297,
+          "best_energy": -60.72376478824562,
+          "mean_regret": 0.03281172435548242,
+          "feasibility_rate": 1.0,
+          "success_rate_1pct": 0.05,
+          "mean_runtime": 0.030365955829620362,
+          "std_runtime": 0.017889820040013975
+        },
+        "Tabu": {
+          "mean_energy": -61.257372787823066,
+          "std_energy": 2.1316282072803006e-14,
+          "best_energy": -61.25737278782309,
+          "mean_regret": 0.0,
+          "feasibility_rate": 1.0,
+          "success_rate_1pct": 1.0,
+          "mean_runtime": 0.12752102613449096,
+          "std_runtime": 0.01572458446206567
+        },
+        "QAOA-sim": {
+          "mean_energy": -60.528965289702896,
+          "std_energy": 0.35426033689587955,
+          "best_energy": -61.25737278782309,
+          "mean_regret": 0.01189093597995421,
+          "feasibility_rate": 1.0,
+          "success_rate_1pct": 0.4,
+          "mean_runtime": 0.014920580387115478,
+          "std_runtime": 0.0023751273598383495
+        }
+      }
+    }
+  },
+  "tn_qaoa_scaling": {
+    "chi_values": [
+      4,
+      8,
+      16,
+      32,
+      64
+    ],
+    "convergence": {
+      "schedule": {
+        "4": {
+          "best_energy": -64.75,
+          "regret": 0.4533558463486703,
+          "expected_energy": -54.50975265795849,
+          "truncation_noise": 0.5,
+          "mean_runtime": 0.005908155441284179
+        },
+        "8": {
+          "best_energy": -69.2,
+          "regret": 0.41578725200506544,
+          "expected_energy": -64.24855479490567,
+          "truncation_noise": 0.35355339059327373,
+          "mean_runtime": 0.015903949737548828
+        },
+        "16": {
+          "best_energy": -85.15,
+          "regret": 0.2811312790206838,
+          "expected_energy": -71.77883295353999,
+          "truncation_noise": 0.25,
+          "mean_runtime": 0.06643896102905274
+        },
+        "32": {
+          "best_energy": -96.30000000000001,
+          "regret": 0.18699873364288722,
+          "expected_energy": -82.70986100625552,
+          "truncation_noise": 0.17677669529663687,
+          "mean_runtime": 0.23935084342956542
+        },
+        "64": {
+          "best_energy": -96.30000000000001,
+          "regret": 0.18699873364288722,
+          "expected_energy": -82.70995518449982,
+          "truncation_noise": 0.125,
+          "mean_runtime": 0.24408822059631347
+        }
+      },
+      "setup": {
+        "4": {
+          "best_energy": -59.947908783875874,
+          "regret": 0.021376431021336774,
+          "expected_energy": -57.039175016407185,
+          "truncation_noise": 0.5,
+          "mean_runtime": 0.0016073226928710938
+        },
+        "8": {
+          "best_energy": -59.97779122381141,
+          "regret": 0.020888613170593522,
+          "expected_energy": -59.767104444363575,
+          "truncation_noise": 0.35355339059327373,
+          "mean_runtime": 0.005526256561279297
+        },
+        "16": {
+          "best_energy": -60.70654205945596,
+          "regret": 0.008992072354703073,
+          "expected_energy": -60.17295171510098,
+          "truncation_noise": 0.25,
+          "mean_runtime": 0.020676803588867188
+        },
+        "32": {
+          "best_energy": -61.206759721709005,
+          "regret": 0.000826236317535031,
+          "expected_energy": -60.558478580849496,
+          "truncation_noise": 0.17677669529663687,
+          "mean_runtime": 0.10553054809570313
+        },
+        "64": {
+          "best_energy": -61.206759721709005,
+          "regret": 0.000826236317535031,
+          "expected_energy": -60.65052779434048,
+          "truncation_noise": 0.125,
+          "mean_runtime": 0.20625600814819336
+        }
+      }
+    },
+    "qubit_scaling": [
+      {
+        "n_vars": 12,
+        "runtime": 0.01208806037902832,
+        "best_energy": -6.473715863973347
+      },
+      {
+        "n_vars": 18,
+        "runtime": 0.01896810531616211,
+        "best_energy": -12.988800894884204
+      },
+      {
+        "n_vars": 24,
+        "runtime": 0.025805950164794922,
+        "best_energy": -13.930453967792854
+      },
+      {
+        "n_vars": 36,
+        "runtime": 0.04237961769104004,
+        "best_energy": -42.62330372280098
+      },
+      {
+        "n_vars": 48,
+        "runtime": 0.05868697166442871,
+        "best_energy": -32.64105098719608
+      }
+    ]
+  }
+}

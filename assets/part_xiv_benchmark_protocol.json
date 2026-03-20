@@ -1,0 +1,681 @@
+{
+  "part": "XIV \u2014 Research Protocol & Benchmark Contracts",
+  "timestamp": "2026-03-20T20:29:41Z",
+  "plan_week": 1,
+  "plan_deliverables": [
+    "Research claim freeze",
+    "Benchmark protocol",
+    "Output contracts (ProblemSpec, SolverRun, ValidationReport)",
+    "QUBO inventory",
+    "Unified benchmark runner"
+  ],
+  "claims_registry": {
+    "n_claims": 21,
+    "tier_counts": {
+      "1": 0,
+      "2": 2,
+      "3": 0,
+      "4": 19
+    },
+    "domain_counts": {
+      "quantum": 11,
+      "aero": 3,
+      "strategy": 2,
+      "energy": 1,
+      "ml": 4
+    },
+    "n_blockers": 5,
+    "readiness_pct": 9.523809523809524
+  },
+  "qubo_inventory": {
+    "n_problems": 7,
+    "problems": [
+      {
+        "problem_id": "QUBO-16q-aero-sub",
+        "name": "16q-aero-sub",
+        "part": "I-IV",
+        "n_qubits": 16,
+        "n_couplings": 120,
+        "density": 1.0,
+        "energy_range": 0.04556708229272832,
+        "ground_energy": 0.11753935570610846,
+        "domain": "aero",
+        "geometry_family": "",
+        "operating_conditions": ""
+      },
+      {
+        "problem_id": "QUBO-40q-coupled",
+        "name": "40q-coupled",
+        "part": "V",
+        "n_qubits": 24,
+        "n_couplings": 253,
+        "density": 0.9166666666666666,
+        "energy_range": 0.2354306512041707,
+        "ground_energy": -0.6710292673274472,
+        "domain": "coupled",
+        "geometry_family": "",
+        "operating_conditions": ""
+      },
+      {
+        "problem_id": "QUBO-jeddah-sector",
+        "name": "jeddah-sector",
+        "part": "VI",
+        "n_qubits": 10,
+        "n_couplings": 25,
+        "density": 0.5555555555555556,
+        "energy_range": 0.21953888274413202,
+        "ground_energy": 0.3971040452912446,
+        "domain": "aero",
+        "geometry_family": "",
+        "operating_conditions": ""
+      },
+      {
+        "problem_id": "QUBO-v5-multi-zone",
+        "name": "v5-multi-zone",
+        "part": "V.5",
+        "n_qubits": 24,
+        "n_couplings": 276,
+        "density": 1.0,
+        "energy_range": 0.2511971262884448,
+        "ground_energy": -0.13615421316674073,
+        "domain": "aero",
+        "geometry_family": "",
+        "operating_conditions": ""
+      },
+      {
+        "problem_id": "QUBO-multi-lap-strategy",
+        "name": "multi-lap-strategy",
+        "part": "VII",
+        "n_qubits": 66,
+        "n_couplings": 405,
+        "density": 0.1888111888111888,
+        "energy_range": 2518.9385335048487,
+        "ground_energy": -66956.08355426154,
+        "domain": "strategy",
+        "geometry_family": "",
+        "operating_conditions": ""
+      },
+      {
+        "problem_id": "QUBO-overtake-drs",
+        "name": "overtake-drs",
+        "part": "VIII",
+        "n_qubits": 64,
+        "n_couplings": 2016,
+        "density": 1.0,
+        "energy_range": 8.348124999999996,
+        "ground_energy": -112.17187500010914,
+        "domain": "strategy",
+        "geometry_family": "",
+        "operating_conditions": ""
+      },
+      {
+        "problem_id": "QUBO-ers-active-aero",
+        "name": "ers-active-aero",
+        "part": "IX",
+        "n_qubits": 154,
+        "n_couplings": 755,
+        "density": 0.0640862405568288,
+        "energy_range": 1.7201809954751122,
+        "ground_energy": -5.879638009049774,
+        "domain": "energy",
+        "geometry_family": "",
+        "operating_conditions": ""
+      }
+    ],
+    "difficulty_scores": [
+      5.550687234830624,
+      5.677461552303711,
+      2.865805930770853,
+      13.043907094425295,
+      1.1841838993624125,
+      6.446535725228945,
+      0.6019492014598576
+    ]
+  },
+  "benchmark_protocol": {
+    "n_seeds": 20,
+    "n_reads": 300,
+    "epsilon": 0.01,
+    "solvers": [
+      "SA",
+      "Tabu"
+    ],
+    "compliance": 100.0,
+    "protocol_checks": {
+      "identical_seeds": true,
+      "identical_budget": true,
+      "identical_variables": true,
+      "multi_seed_runs": true,
+      "bootstrap_ci": true,
+      "success_probability": true,
+      "regret_metric": true,
+      "contracts_defined": true
+    }
+  },
+  "benchmark_results": {
+    "16q-aero-sub": {
+      "SA": {
+        "regret_mean": 3.730349362740526e-14,
+        "regret_std": 0.0,
+        "regret_rel_mean": 4.660606400224963e-15,
+        "success_prob": 1.0,
+        "runtime_mean": 0.10091238021850586,
+        "runtime_std": 0.030010449933350676,
+        "best_energy": -8.003999999999962,
+        "n_seeds": 20
+      },
+      "Tabu": {
+        "regret_mean": 0.0,
+        "regret_std": 0.0,
+        "regret_rel_mean": 0.0,
+        "success_prob": 1.0,
+        "runtime_mean": 6.312487494945526,
+        "runtime_std": 0.02894793241042212,
+        "best_energy": -8.004,
+        "n_seeds": 20
+      }
+    },
+    "40q-coupled": {
+      "SA": {
+        "regret_mean": -0.070350699120202,
+        "regret_std": 2.7755575615628914e-17,
+        "regret_rel_mean": -0.10483998619059871,
+        "success_prob": 1.0,
+        "runtime_mean": 0.07751423120498657,
+        "runtime_std": 0.002277180783724152,
+        "best_energy": -0.7413799664476491,
+        "n_seeds": 20
+      },
+      "Tabu": {
+        "regret_mean": -0.07035069912020164,
+        "regret_std": 0.0,
+        "regret_rel_mean": -0.10483998619059823,
+        "success_prob": 1.0,
+        "runtime_mean": 6.316061723232269,
+        "runtime_std": 0.041812902678883906,
+        "best_energy": -0.7413799664476488,
+        "n_seeds": 20
+      }
+    },
+    "jeddah-sector": {
+      "SA": {
+        "regret_mean": 2.220446049250313e-16,
+        "regret_std": 0.0,
+        "regret_rel_mean": 2.353058621928711e-16,
+        "success_prob": 1.0,
+        "runtime_mean": 0.02641124725341797,
+        "runtime_std": 0.001117297822010332,
+        "best_energy": -0.9436424696584678,
+        "n_seeds": 20
+      },
+      "Tabu": {
+        "regret_mean": 0.0,
+        "regret_std": 0.0,
+        "regret_rel_mean": 0.0,
+        "success_prob": 1.0,
+        "runtime_mean": 6.31448450088501,
+        "runtime_std": 0.03938765793938787,
+        "best_energy": -0.943642469658468,
+        "n_seeds": 20
+      }
+    },
+    "v5-multi-zone": {
+      "SA": {
+        "regret_mean": -0.36462448002571596,
+        "regret_std": 5.551115123125783e-17,
+        "regret_rel_mean": -2.6780256853051023,
+        "success_prob": 1.0,
+        "runtime_mean": 0.10956965684890747,
+        "runtime_std": 0.003947117429304207,
+        "best_energy": -0.5007786931924566,
+        "n_seeds": 20
+      },
+      "Tabu": {
+        "regret_mean": -0.3646244800257142,
+        "regret_std": 5.551115123125783e-17,
+        "regret_rel_mean": -2.678025685305089,
+        "success_prob": 1.0,
+        "runtime_mean": 6.314427423477173,
+        "runtime_std": 0.02836533859618345,
+        "best_energy": -0.5007786931924548,
+        "n_seeds": 20
+      }
+    },
+    "multi-lap-strategy": {
+      "SA": {
+        "regret_mean": 0.0,
+        "regret_std": 0.0,
+        "regret_rel_mean": 0.0,
+        "success_prob": 1.0,
+        "runtime_mean": 0.27350497245788574,
+        "runtime_std": 0.058048300360596626,
+        "best_energy": -66956.08355426154,
+        "n_seeds": 20
+      },
+      "Tabu": {
+        "regret_mean": 1.4551915228366852e-11,
+        "regret_std": 0.0,
+        "regret_rel_mean": 2.1733522117633883e-16,
+        "success_prob": 1.0,
+        "runtime_mean": 6.3330882549285885,
+        "runtime_std": 0.06026750534477325,
+        "best_energy": -66956.08355426152,
+        "n_seeds": 20
+      }
+    },
+    "overtake-drs": {
+      "SA": {
+        "regret_mean": 0.0,
+        "regret_std": 0.0,
+        "regret_rel_mean": 0.0,
+        "success_prob": 1.0,
+        "runtime_mean": 0.61482675075531,
+        "runtime_std": 0.02348815740856954,
+        "best_energy": -112.17187500010914,
+        "n_seeds": 20
+      },
+      "Tabu": {
+        "regret_mean": 1.0913936421275139e-10,
+        "regret_std": 0.0,
+        "regret_rel_mean": 9.729654979257875e-13,
+        "success_prob": 1.0,
+        "runtime_mean": 6.347916603088379,
+        "runtime_std": 0.0889511295488574,
+        "best_energy": -112.171875,
+        "n_seeds": 20
+      }
+    },
+    "ers-active-aero": {
+      "SA": {
+        "regret_mean": -213.26263524469724,
+        "regret_std": 0.3656301792781728,
+        "regret_rel_mean": -36.271388632499665,
+        "success_prob": 1.0,
+        "runtime_mean": 0.3037976861000061,
+        "runtime_std": 0.021208730286009666,
+        "best_energy": -219.90385609964164,
+        "n_seeds": 20
+      },
+      "Tabu": {
+        "regret_mean": -215.87040296379502,
+        "regret_std": 0.00745617902491369,
+        "regret_rel_mean": -36.71491384869215,
+        "success_prob": 1.0,
+        "runtime_mean": 6.343041443824768,
+        "runtime_std": 0.06101816013072113,
+        "best_energy": -221.765586345497,
+        "n_seeds": 20
+      }
+    }
+  },
+  "winners": {
+    "jeddah-sector": {
+      "solver": "Tabu",
+      "confidence": "low"
+    },
+    "16q-aero-sub": {
+      "solver": "Tabu",
+      "confidence": "low"
+    },
+    "40q-coupled": {
+      "solver": "SA",
+      "confidence": "low"
+    },
+    "v5-multi-zone": {
+      "solver": "SA",
+      "confidence": "low"
+    },
+    "overtake-drs": {
+      "solver": "SA",
+      "confidence": "low"
+    },
+    "multi-lap-strategy": {
+      "solver": "SA",
+      "confidence": "low"
+    },
+    "ers-active-aero": {
+      "solver": "Tabu",
+      "confidence": "high"
+    }
+  },
+  "bootstrap_ci": {
+    "jeddah-sector": {
+      "SA": {
+        "mean": 2.220446049250313e-16,
+        "ci_lo": 2.220446049250313e-16,
+        "ci_hi": 2.220446049250313e-16
+      },
+      "Tabu": {
+        "mean": 0.0,
+        "ci_lo": 0.0,
+        "ci_hi": 0.0
+      }
+    },
+    "16q-aero-sub": {
+      "SA": {
+        "mean": 3.730349362740526e-14,
+        "ci_lo": 3.730349362740526e-14,
+        "ci_hi": 3.730349362740526e-14
+      },
+      "Tabu": {
+        "mean": 0.0,
+        "ci_lo": 0.0,
+        "ci_hi": 0.0
+      }
+    },
+    "40q-coupled": {
+      "SA": {
+        "mean": -0.070350699120202,
+        "ci_lo": -0.070350699120202,
+        "ci_hi": -0.070350699120202
+      },
+      "Tabu": {
+        "mean": -0.07035069912020164,
+        "ci_lo": -0.07035069912020164,
+        "ci_hi": -0.07035069912020164
+      }
+    },
+    "v5-multi-zone": {
+      "SA": {
+        "mean": -0.36462448002571596,
+        "ci_lo": -0.36462448002571596,
+        "ci_hi": -0.36462448002571596
+      },
+      "Tabu": {
+        "mean": -0.3646244800257142,
+        "ci_lo": -0.3646244800257142,
+        "ci_hi": -0.3646244800257142
+      }
+    },
+    "overtake-drs": {
+      "SA": {
+        "mean": 0.0,
+        "ci_lo": 0.0,
+        "ci_hi": 0.0
+      },
+      "Tabu": {
+        "mean": 1.0913936421275139e-10,
+        "ci_lo": 1.0913936421275139e-10,
+        "ci_hi": 1.0913936421275139e-10
+      }
+    },
+    "multi-lap-strategy": {
+      "SA": {
+        "mean": 0.0,
+        "ci_lo": 0.0,
+        "ci_hi": 0.0
+      },
+      "Tabu": {
+        "mean": 1.4551915228366852e-11,
+        "ci_lo": 1.4551915228366852e-11,
+        "ci_hi": 1.4551915228366852e-11
+      }
+    },
+    "ers-active-aero": {
+      "SA": {
+        "mean": -213.26263524469724,
+        "ci_lo": -213.41781315422642,
+        "ci_hi": -213.10375032654747
+      },
+      "Tabu": {
+        "mean": -215.87040296379502,
+        "ci_lo": -215.87372293455147,
+        "ci_hi": -215.86718166865913
+      }
+    }
+  },
+  "validation_reports": [
+    {
+      "report_id": "VR-jeddah-sector",
+      "problem_id": "QUBO-jeddah-sector",
+      "solvers_compared": [
+        "SA",
+        "Tabu"
+      ],
+      "n_seeds": 20,
+      "budget_per_solver": 300,
+      "metrics": {
+        "SA": {
+          "regret_mean": 2.220446049250313e-16,
+          "regret_std": 0.0,
+          "regret_rel_mean": 2.353058621928711e-16,
+          "success_prob": 1.0,
+          "runtime_mean": 0.02641124725341797,
+          "runtime_std": 0.001117297822010332,
+          "best_energy": -0.9436424696584678,
+          "n_seeds": 20
+        },
+        "Tabu": {
+          "regret_mean": 0.0,
+          "regret_std": 0.0,
+          "regret_rel_mean": 0.0,
+          "success_prob": 1.0,
+          "runtime_mean": 6.31448450088501,
+          "runtime_std": 0.03938765793938787,
+          "best_energy": -0.943642469658468,
+          "n_seeds": 20
+        }
+      },
+      "winner": "Tabu",
+      "confidence": "low",
+      "evidence_tier": 4,
+      "notes": "Protocol: 20 seeds, 300 reads, \u03b5=0.01"
+    },
+    {
+      "report_id": "VR-16q-aero-sub",
+      "problem_id": "QUBO-16q-aero-sub",
+      "solvers_compared": [
+        "SA",
+        "Tabu"
+      ],
+      "n_seeds": 20,
+      "budget_per_solver": 300,
+      "metrics": {
+        "SA": {
+          "regret_mean": 3.730349362740526e-14,
+          "regret_std": 0.0,
+          "regret_rel_mean": 4.660606400224963e-15,
+          "success_prob": 1.0,
+          "runtime_mean": 0.10091238021850586,
+          "runtime_std": 0.030010449933350676,
+          "best_energy": -8.003999999999962,
+          "n_seeds": 20
+        },
+        "Tabu": {
+          "regret_mean": 0.0,
+          "regret_std": 0.0,
+          "regret_rel_mean": 0.0,
+          "success_prob": 1.0,
+          "runtime_mean": 6.312487494945526,
+          "runtime_std": 0.02894793241042212,
+          "best_energy": -8.004,
+          "n_seeds": 20
+        }
+      },
+      "winner": "Tabu",
+      "confidence": "low",
+      "evidence_tier": 4,
+      "notes": "Protocol: 20 seeds, 300 reads, \u03b5=0.01"
+    },
+    {
+      "report_id": "VR-40q-coupled",
+      "problem_id": "QUBO-40q-coupled",
+      "solvers_compared": [
+        "SA",
+        "Tabu"
+      ],
+      "n_seeds": 20,
+      "budget_per_solver": 300,
+      "metrics": {
+        "SA": {
+          "regret_mean": -0.070350699120202,
+          "regret_std": 2.7755575615628914e-17,
+          "regret_rel_mean": -0.10483998619059871,
+          "success_prob": 1.0,
+          "runtime_mean": 0.07751423120498657,
+          "runtime_std": 0.002277180783724152,
+          "best_energy": -0.7413799664476491,
+          "n_seeds": 20
+        },
+        "Tabu": {
+          "regret_mean": -0.07035069912020164,
+          "regret_std": 0.0,
+          "regret_rel_mean": -0.10483998619059823,
+          "success_prob": 1.0,
+          "runtime_mean": 6.316061723232269,
+          "runtime_std": 0.041812902678883906,
+          "best_energy": -0.7413799664476488,
+          "n_seeds": 20
+        }
+      },
+      "winner": "SA",
+      "confidence": "low",
+      "evidence_tier": 4,
+      "notes": "Protocol: 20 seeds, 300 reads, \u03b5=0.01"
+    },
+    {
+      "report_id": "VR-v5-multi-zone",
+      "problem_id": "QUBO-v5-multi-zone",
+      "solvers_compared": [
+        "SA",
+        "Tabu"
+      ],
+      "n_seeds": 20,
+      "budget_per_solver": 300,
+      "metrics": {
+        "SA": {
+          "regret_mean": -0.36462448002571596,
+          "regret_std": 5.551115123125783e-17,
+          "regret_rel_mean": -2.6780256853051023,
+          "success_prob": 1.0,
+          "runtime_mean": 0.10956965684890747,
+          "runtime_std": 0.003947117429304207,
+          "best_energy": -0.5007786931924566,
+          "n_seeds": 20
+        },
+        "Tabu": {
+          "regret_mean": -0.3646244800257142,
+          "regret_std": 5.551115123125783e-17,
+          "regret_rel_mean": -2.678025685305089,
+          "success_prob": 1.0,
+          "runtime_mean": 6.314427423477173,
+          "runtime_std": 0.02836533859618345,
+          "best_energy": -0.5007786931924548,
+          "n_seeds": 20
+        }
+      },
+      "winner": "SA",
+      "confidence": "low",
+      "evidence_tier": 4,
+      "notes": "Protocol: 20 seeds, 300 reads, \u03b5=0.01"
+    },
+    {
+      "report_id": "VR-overtake-drs",
+      "problem_id": "QUBO-overtake-drs",
+      "solvers_compared": [
+        "SA",
+        "Tabu"
+      ],
+      "n_seeds": 20,
+      "budget_per_solver": 300,
+      "metrics": {
+        "SA": {
+          "regret_mean": 0.0,
+          "regret_std": 0.0,
+          "regret_rel_mean": 0.0,
+          "success_prob": 1.0,
+          "runtime_mean": 0.61482675075531,
+          "runtime_std": 0.02348815740856954,
+          "best_energy": -112.17187500010914,
+          "n_seeds": 20
+        },
+        "Tabu": {
+          "regret_mean": 1.0913936421275139e-10,
+          "regret_std": 0.0,
+          "regret_rel_mean": 9.729654979257875e-13,
+          "success_prob": 1.0,
+          "runtime_mean": 6.347916603088379,
+          "runtime_std": 0.0889511295488574,
+          "best_energy": -112.171875,
+          "n_seeds": 20
+        }
+      },
+      "winner": "SA",
+      "confidence": "low",
+      "evidence_tier": 4,
+      "notes": "Protocol: 20 seeds, 300 reads, \u03b5=0.01"
+    },
+    {
+      "report_id": "VR-multi-lap-strategy",
+      "problem_id": "QUBO-multi-lap-strategy",
+      "solvers_compared": [
+        "SA",
+        "Tabu"
+      ],
+      "n_seeds": 20,
+      "budget_per_solver": 300,
+      "metrics": {
+        "SA": {
+          "regret_mean": 0.0,
+          "regret_std": 0.0,
+          "regret_rel_mean": 0.0,
+          "success_prob": 1.0,
+          "runtime_mean": 0.27350497245788574,
+          "runtime_std": 0.058048300360596626,
+          "best_energy": -66956.08355426154,
+          "n_seeds": 20
+        },
+        "Tabu": {
+          "regret_mean": 1.4551915228366852e-11,
+          "regret_std": 0.0,
+          "regret_rel_mean": 2.1733522117633883e-16,
+          "success_prob": 1.0,
+          "runtime_mean": 6.3330882549285885,
+          "runtime_std": 0.06026750534477325,
+          "best_energy": -66956.08355426152,
+          "n_seeds": 20
+        }
+      },
+      "winner": "SA",
+      "confidence": "low",
+      "evidence_tier": 4,
+      "notes": "Protocol: 20 seeds, 300 reads, \u03b5=0.01"
+    },
+    {
+      "report_id": "VR-ers-active-aero",
+      "problem_id": "QUBO-ers-active-aero",
+      "solvers_compared": [
+        "SA",
+        "Tabu"
+      ],
+      "n_seeds": 20,
+      "budget_per_solver": 300,
+      "metrics": {
+        "SA": {
+          "regret_mean": -213.26263524469724,
+          "regret_std": 0.3656301792781728,
+          "regret_rel_mean": -36.271388632499665,
+          "success_prob": 1.0,
+          "runtime_mean": 0.3037976861000061,
+          "runtime_std": 0.021208730286009666,
+          "best_energy": -219.90385609964164,
+          "n_seeds": 20
+        },
+        "Tabu": {
+          "regret_mean": -215.87040296379502,
+          "regret_std": 0.00745617902491369,
+          "regret_rel_mean": -36.71491384869215,
+          "success_prob": 1.0,
+          "runtime_mean": 6.343041443824768,
+          "runtime_std": 0.06101816013072113,
+          "best_energy": -221.765586345497,
+          "n_seeds": 20
+        }
+      },
+      "winner": "Tabu",
+      "confidence": "high",
+      "evidence_tier": 4,
+      "notes": "Protocol: 20 seeds, 300 reads, \u03b5=0.01"
+    }
+  ]
+}

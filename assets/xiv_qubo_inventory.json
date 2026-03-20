@@ -1,0 +1,106 @@
+{
+  "timestamp": "2026-03-20T20:14:12Z",
+  "n_problems": 7,
+  "problems": [
+    {
+      "problem_id": "QUBO-16q-aero-sub",
+      "name": "16q-aero-sub",
+      "part": "I-IV",
+      "n_qubits": 16,
+      "n_couplings": 120,
+      "density": 1.0,
+      "energy_range": 0.04556708229272832,
+      "ground_energy": 0.11753935570610846,
+      "domain": "aero",
+      "geometry_family": "",
+      "operating_conditions": ""
+    },
+    {
+      "problem_id": "QUBO-40q-coupled",
+      "name": "40q-coupled",
+      "part": "V",
+      "n_qubits": 24,
+      "n_couplings": 253,
+      "density": 0.9166666666666666,
+      "energy_range": 0.2354306512041707,
+      "ground_energy": -0.6710292673274472,
+      "domain": "coupled",
+      "geometry_family": "",
+      "operating_conditions": ""
+    },
+    {
+      "problem_id": "QUBO-jeddah-sector",
+      "name": "jeddah-sector",
+      "part": "VI",
+      "n_qubits": 10,
+      "n_couplings": 25,
+      "density": 0.5555555555555556,
+      "energy_range": 0.21953888274413202,
+      "ground_energy": 0.3971040452912446,
+      "domain": "aero",
+      "geometry_family": "",
+      "operating_conditions": ""
+    },
+    {
+      "problem_id": "QUBO-v5-multi-zone",
+      "name": "v5-multi-zone",
+      "part": "V.5",
+      "n_qubits": 24,
+      "n_couplings": 276,
+      "density": 1.0,
+      "energy_range": 0.2511971262884448,
+      "ground_energy": -0.13615421316674073,
+      "domain": "aero",
+      "geometry_family": "",
+      "operating_conditions": ""
+    },
+    {
+      "problem_id": "QUBO-multi-lap-strategy",
+      "name": "multi-lap-strategy",
+      "part": "VII",
+      "n_qubits": 66,
+      "n_couplings": 405,
+      "density": 0.1888111888111888,
+      "energy_range": 2518.9385335048487,
+      "ground_energy": -66956.08355426154,
+      "domain": "strategy",
+      "geometry_family": "",
+      "operating_conditions": ""
+    },
+    {
+      "problem_id": "QUBO-overtake-drs",
+      "name": "overtake-drs",
+      "part": "VIII",
+      "n_qubits": 64,
+      "n_couplings": 2016,
+      "density": 1.0,
+      "energy_range": 8.348124999999996,
+      "ground_energy": -112.17187500010914,
+      "domain": "strategy",
+      "geometry_family": "",
+      "operating_conditions": ""
+    },
+    {
+      "problem_id": "QUBO-ers-active-aero",
+      "name": "ers-active-aero",
+      "part": "IX",
+      "n_qubits": 154,
+      "n_couplings": 755,
+      "density": 0.0640862405568288,
+      "energy_range": 1.7201809954751122,
+      "ground_energy": -5.879638009049774,
+      "domain": "energy",
+      "geometry_family": "",
+      "operating_conditions": ""
+    }
+  ],
+  "difficulty_scores": [
+    5.550687234830624,
+    5.677461552303711,
+    2.865805930770853,
+    13.043907094425295,
+    1.1841838993624125,
+    6.446535725228945,
+    0.6019492014598576
+  ]
+}
