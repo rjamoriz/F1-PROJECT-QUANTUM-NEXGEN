@@ -1,0 +1,466 @@
+{
+  "part": "XIII \u2014 Scientific Rigor & Validation Framework",
+  "timestamp": "2026-03-20T14:39:03Z",
+  "sections": {
+    "XIII.1_fair_benchmark": {
+      "tiers": {
+        "Small (16-var)": {
+          "SA": {
+            "energy": -8.003999999999962,
+            "regret": 16.00084432376676,
+            "time_s": 0.12951922416687012,
+            "regret_pct": 66.6567302330915
+          },
+          "Tabu": {
+            "energy": -8.004,
+            "regret": 16.00084432376672,
+            "time_s": 189.05215907096863,
+            "regret_pct": 66.65673023309134
+          },
+          "ma-QAOA": {
+            "energy": -24.004844323766722,
+            "regret": 0.0,
+            "time_s": 0.5,
+            "regret_pct": 0.0
+          },
+          "FALQON": {
+            "energy": 143.41750070100014,
+            "regret": 167.42234502476686,
+            "time_s": 0.3,
+            "regret_pct": 697.4523257332909
+          }
+        },
+        "Medium (40-var)": {
+          "SA": {
+            "energy": -24.00985259782601,
+            "regret": 1.4601653219870059e-12,
+            "time_s": 0.08729791641235352,
+            "regret_pct": 6.081525557216993e-12
+          },
+          "Tabu": {
+            "energy": -24.00985259782747,
+            "regret": 0.0,
+            "time_s": 600.3393907546997,
+            "regret_pct": 0.0
+          }
+        },
+        "Large (80-var)": {
+          "SA": {
+            "energy": -32.13435259784774,
+            "regret": 94.7179907650896,
+            "time_s": 0.0,
+            "regret_pct": 74.66790778479502
+          },
+          "Tabu": {
+            "energy": -32.13835259782747,
+            "regret": 94.71399076510986,
+            "time_s": 0.0,
+            "regret_pct": 74.6647545123574
+          },
+          "TN-QAOA": {
+            "energy": -126.85234336293733,
+            "regret": 0.0,
+            "time_s": 0.0,
+            "regret_pct": 0.0
+          }
+        }
+      },
+      "best_per_tier": {
+        "Small (16-var)": -24.004844323766722,
+        "Medium (40-var)": -24.00985259782747,
+        "Large (80-var)": -126.85234336293733
+      },
+      "radar_scores": {
+        "SA": [
+          0.333432697669085,
+          0.9993149021724045,
+          1.0,
+          0.9,
+          0.9,
+          1.0
+        ],
+        "Tabu": [
+          0.3334326976690867,
+          5.289545468301071e-09,
+          1.0,
+          0.7,
+          0.85,
+          1.0
+        ],
+        "ma-QAOA": [
+          1.0,
+          0.9973552272567936,
+          0.3,
+          0.4,
+          0.5,
+          0.4
+        ],
+        "FALQON": [
+          0,
+          0.9984131363540761,
+          0.3,
+          0.3,
+          0.7,
+          0.4
+        ]
+      },
+      "fairness_audit": {
+        "original_gap": 8.129508274081015,
+        "fair_gap": -16.00084432376676,
+        "sa_16var": -8.003999999999962,
+        "tabu_16var": -8.004
+      }
+    },
+    "XIII.2_robust_metrics": {
+      "E_star_16var": -24.004844323766722,
+      "sa": {
+        "mean": -8.003999999999962,
+        "std": 0.0,
+        "ci_95": [
+          -8.003999999999962,
+          -8.003999999999962
+        ],
+        "n_seeds": 10,
+        "regret_mean": 16.00084432376676,
+        "regret_std": 0.0
+      },
+      "tabu": {
+        "mean": -8.004000000000001,
+        "std": 1.7763568394002505e-15,
+        "ci_95": [
+          -8.004000000000001,
+          -8.004000000000001
+        ],
+        "n_seeds": 10,
+        "regret_mean": 16.00084432376672,
+        "regret_std": 0.0
+      },
+      "ma_qaoa": {
+        "energy": -24.004844323766722,
+        "regret": 0.0,
+        "n_seeds": 1
+      },
+      "falqon": {
+        "energy": 143.41750070100014,
+        "regret": 167.42234502476686,
+        "n_seeds": 1
+      },
+      "success_prob": {
+        "eps_0.0": {
+          "sa": 0.0,
+          "tabu": 0.0,
+          "ma_qaoa": 1.0,
+          "falqon": 0.0
+        },
+        "eps_0.01": {
+          "sa": 0.0,
+          "tabu": 0.0,
+          "ma_qaoa": 1.0,
+          "falqon": 0.0
+        },
+        "eps_0.05": {
+          "sa": 0.0,
+          "tabu": 0.0,
+          "ma_qaoa": 1.0,
+          "falqon": 0.0
+        },
+        "eps_0.1": {
+          "sa": 0.0,
+          "tabu": 0.0,
+          "ma_qaoa": 1.0,
+          "falqon": 0.0
+        },
+        "eps_0.5": {
+          "sa": 0.0,
+          "tabu": 0.0,
+          "ma_qaoa": 1.0,
+          "falqon": 0.0
+        },
+        "eps_1.0": {
+          "sa": 0.0,
+          "tabu": 0.0,
+          "ma_qaoa": 1.0,
+          "falqon": 0.0
+        }
+      }
+    },
+    "XIII.3_tn_convergence": {
+      "chi_values": [
+        4,
+        8,
+        16,
+        32,
+        64
+      ],
+      "energies": {
+        "4": 128.2846600307299,
+        "8": 128.2846600307299,
+        "16": 128.2846600307299,
+        "32": 128.2846600307299,
+        "64": 128.2846600307299
+      },
+      "times": {
+        "4": 2.6232800483703613,
+        "8": 2.0255117416381836,
+        "16": 2.204361915588379,
+        "32": 1.6096751689910889,
+        "64": 1.4652340412139893
+      },
+      "trunc_errors": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "delta_32_64": 0.0,
+      "converged_at_32": true,
+      "best_params": {
+        "gamma": 0.1,
+        "beta": 1.22
+      }
+    },
+    "XIII.4_falqon_audit": {
+      "n_layers": 15,
+      "monotone_rate": 0.5,
+      "n_violations": 7,
+      "violations": [
+        {
+          "layer": 2,
+          "delta_E": 85.01449107131833,
+          "relative": 0.44175741456706535
+        },
+        {
+          "layer": 4,
+          "delta_E": 75.2473996910881,
+          "relative": 0.5246737624299048
+        },
+        {
+          "layer": 6,
+          "delta_E": 75.24739969108805,
+          "relative": 0.5246737624299062
+        },
+        {
+          "layer": 8,
+          "delta_E": 75.24739969108796,
+          "relative": 0.5246737624299066
+        },
+        {
+          "layer": 10,
+          "delta_E": 75.24739969108768,
+          "relative": 0.5246737624299058
+        },
+        {
+          "layer": 12,
+          "delta_E": 75.24739969108751,
+          "relative": 0.5246737624299056
+        },
+        {
+          "layer": 14,
+          "delta_E": 75.24739969108748,
+          "relative": 0.5246737624299064
+        }
+      ],
+      "total_violation_magnitude": 536.4988892178451,
+      "commutator": {
+        "norm_kept": 63.86656561801284,
+        "norm_dropped": 495.7418683145494,
+        "norm_full": 499.83891225457825,
+        "approx_fidelity": 0.12777429698287332,
+        "error_fraction": 0.9918032713348612
+      },
+      "severity": "SEVERE",
+      "conservative_claim": "using a coarse commutator approximation (~99% of terms dropped); theoretical monotonicity guarantee does NOT hold"
+    },
+    "XIII.5_missingness": {
+      "fill_rate": 0.3125,
+      "method_fill": {
+        "Brute-Force": 0.375,
+        "D-Wave SA": 1.0,
+        "D-Wave Tabu": 0.875,
+        "QAOA p=3": 0.125,
+        "CVaR-QAOA": 0.125,
+        "WS-QAOA": 0.125,
+        "RQAOA": 0.125,
+        "ma-QAOA": 0.125,
+        "FALQON": 0.125,
+        "TN-QAOA": 0.125
+      },
+      "problem_fill": {
+        "P-I  18q Aero": 0.7,
+        "P-III 24q Coupled": 0.2,
+        "P-IV  12q Jeddah": 0.3,
+        "P-V   24q ICE-ERS": 0.2,
+        "P-VI  52q Brake": 0.2,
+        "P-VII 44q Wake": 0.2,
+        "P-VIII 64q ERS": 0.2,
+        "P-X   80q Reg": 0.5
+      },
+      "bootstrap": {
+        "n_resamples": 200,
+        "A_mean_cv": 3.191230246848333,
+        "B_mean_cv": 28.455332550201906,
+        "C_mean_cv": 23.031975157767672
+      },
+      "n_unstable_method_factors": 18,
+      "n_unstable_problem_factors": 20
+    },
+    "XIII.6_validation_ladder": {
+      "tiers": {
+        "1": "Wind-Tunnel Correlated",
+        "2": "CFD-Validated",
+        "3": "VLM/Panel-Validated",
+        "4": "Surrogate-Only"
+      },
+      "tier_counts": {
+        "1": 0,
+        "2": 0,
+        "3": 2,
+        "4": 12
+      },
+      "claims": [
+        {
+          "claim": "QAOA finds lower-energy configs than random sampling",
+          "part": "Part IV",
+          "tier": 4,
+          "upgrade": "Run QAOA result through RANS CFD mesh"
+        },
+        {
+          "claim": "SA outperforms QAOA on full 80-var QUBO",
+          "part": "Part X",
+          "tier": 4,
+          "upgrade": "Unfair comparison \u2014 XIII.1 corrects this"
+        },
+        {
+          "claim": "ma-QAOA achieves competitive energy on 16-var subproblem",
+          "part": "Part X",
+          "tier": 4,
+          "upgrade": "Validate subproblem relevance via CFD on decoded config"
+        },
+        {
+          "claim": "TN-QAOA with \u03c7=32 captures essential correlations",
+          "part": "Part X",
+          "tier": 4,
+          "upgrade": "XIII.3 convergence test upgrades confidence"
+        },
+        {
+          "claim": "FALQON achieves monotonic energy decrease",
+          "part": "Part X",
+          "tier": 4,
+          "upgrade": "XIII.4 audit \u2014 approximate, not guaranteed"
+        },
+        {
+          "claim": "GNN surrogate predicts Cd within 5% MSE",
+          "part": "Part XI",
+          "tier": 4,
+          "upgrade": "Cross-validate against OpenFOAM RANS on test geometries"
+        },
+        {
+          "claim": "TT-GNN compression achieves similar accuracy at lower rank",
+          "part": "Part XI",
+          "tier": 4,
+          "upgrade": "Verify compression-accuracy tradeoff on held-out circuits"
+        },
+        {
+          "claim": "Shape optimization reduces predicted drag by ~8%",
+          "part": "Part XI",
+          "tier": 4,
+          "upgrade": "CFD-validate optimized shape; check OOD generalization"
+        },
+        {
+          "claim": "CP decomposition reveals method-problem affinity structure",
+          "part": "Part XII",
+          "tier": 4,
+          "upgrade": "XIII.5 bootstrap stability validates factor reliability"
+        },
+        {
+          "claim": "QUBO fingerprinting explains 60%+ of performance variance",
+          "part": "Part XII",
+          "tier": 4,
+          "upgrade": "Test fingerprint features on independent QUBO instances"
+        },
+        {
+          "claim": "2026 active-aero QUBO coefficients capture physics",
+          "part": "Part X",
+          "tier": 4,
+          "upgrade": "Calibrate coefficients against RANS/VLM force predictions"
+        },
+        {
+          "claim": "Quantum screening + classical refinement is a viable hybrid",
+          "part": "Parts IV-X",
+          "tier": 4,
+          "upgrade": "End-to-end validation: quantum-selected config \u2192 CFD \u2192 \u0394lap_time"
+        },
+        {
+          "claim": "Diffuser pressure recovery modeled correctly",
+          "part": "Part VII",
+          "tier": 3,
+          "upgrade": "Panel-method formula used; needs RANS for ground-effect"
+        },
+        {
+          "claim": "Front wing downforce breakdown is realistic",
+          "part": "Part II",
+          "tier": 3,
+          "upgrade": "Based on 2026 FIA geometry estimates, not specific car"
+        }
+      ]
+    },
+    "XIII.7_constrained_shape": {
+      "unconstrained": {
+        "cd": 0.7275716066360474,
+        "cl": -0.7636069059371948,
+        "ld_ratio": -1.0495281824805642,
+        "final_loss": 14.375358581542969
+      },
+      "constrained": {
+        "cd": 0.7280414700508118,
+        "cl": -0.7686170339584351,
+        "ld_ratio": -1.0557324899429033,
+        "final_loss": 14.410107612609863
+      },
+      "active_constraints": {
+        "balance_window": false,
+        "ride_height": false,
+        "stall_margin": false,
+        "structural": false
+      },
+      "constraints": {
+        "balance_window": "Front aero balance 44-46%",
+        "ride_height": "Ground clearance \u2265 15mm",
+        "stall_margin": "Cl \u2264 90% of Cl_max (stall protection)",
+        "structural": "Peak Cp \u2264 3.5 (structural proxy)"
+      }
+    },
+    "XIII.8_ood_generalization": {
+      "ood_results": [
+        {
+          "test_circuit": "Monaco (Low-Speed)",
+          "mse_id": 1.7740906476974487,
+          "mse_ood": 1.3208695650100708,
+          "gap_ratio": 0.7445333003273519
+        },
+        {
+          "test_circuit": "Silverstone (Medium)",
+          "mse_id": 1.6554522514343262,
+          "mse_ood": 1.5576167106628418,
+          "gap_ratio": 0.9409010192310185
+        },
+        {
+          "test_circuit": "Monza (High-Speed)",
+          "mse_id": 1.4375464916229248,
+          "mse_ood": 1.9944273233413696,
+          "gap_ratio": 1.3873828324604316
+        }
+      ],
+      "avg_gap_ratio": 1.0242723840062673
+    }
+  },
+  "key_findings": {
+    "fair_comparison_changes_result": true,
+    "tn_qaoa_converged": true,
+    "falqon_severity": "SEVERE",
+    "tensor_fill_rate": 0.3125,
+    "claims_at_tier_4": 12,
+    "ood_gap_ratio": 1.0242723840062673
+  }
+}
